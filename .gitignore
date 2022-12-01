@@ -1,3 +1,5 @@
 service_account.json
 pickle
 __pycache__
+ignore_drivers.txt
+ignore_riders.txt
