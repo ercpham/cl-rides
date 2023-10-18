@@ -1,116 +1,76 @@
 """ Main file for automatic driver assignments.
 
 Usage:
-    python rides.py
+    usage: python rides.py [-h] --day {friday,sunday} [--fetch | --no-fetch] [--update | --no-update] [--rotate] [--threshold {1,2,3,4,5,6,7,8,9,10}] [--debug]
 """
 
 from cfg.config import GLOBALS, GROUPING_THRESHOLD, SERVICE_ACCT_FILE
 import lib
 import os
-import sys
+import argparse
 
 
-def show_usage() -> None:
-    """ Show usage of rides.py
-    """
-    print('USAGE:')
-    print('python rides.py <--friday | --sunday> [[FLAG] ...]')
-    print()
-    print('FLAG')
-    print('    --help                Shows usage')
-    print('    --debug               Prints out debug statements while running')
-    print('    --no-fetch            Prevents new sheet data from being fetched')
-    print('    --no-update           Prevents the output sheet from being updated')
-    print('    --rotate              Previous assignments are cleared and drivers are rotated based on date last driven')
-    print('    --edit                Previous assignments are retained and new assignments are appended')
-    print('    --friday              Assigns rides for Friday College Life')
-    print('    --sunday              Assigns rides for Sunday service')
-    print('    --threshold=<num>     Sets how many open spots a driver must have to spontaneously pick up at a neighboring location. The default is 2.')
-    print()
-
-
-def main(fetch: bool, update: bool, rotate: bool, edit: bool, friday: bool, debug: bool) -> None:
+def main() -> None:
     """ Assign riders to drivers, updating the sheet if specified
     """
     # Fetch data from sheets
-    if fetch:
+    if args['fetch']:
         lib.update_pickles()
 
     # Print input
-    if debug:
+    if args['debug']:
         lib.print_pickles()
     
     (drivers, riders) = lib.get_cached_input()
     lib.clean_data(drivers, riders)
 
     # Do requested preprocessing
-    if rotate or edit:
+    if args['rotate']:
         prev_out = lib.get_cached_output()
-        if rotate:
-            # Rotate drivers by last date driven
-            lib.rotate_drivers(drivers, lib.get_prev_driver_phones(prev_out))
-            lib.update_drivers_locally(drivers)
-        elif edit:
-            #TODO: Load previous output into assignments
-            pass
+        # Rotate drivers by last date driven
+        lib.rotate_drivers(drivers, lib.get_prev_driver_phones(prev_out))
+        lib.update_drivers_locally(drivers)
 
     # Execute the assignment algorithm
-    if friday:
-        out = lib.assign_friday(drivers, riders, debug)
+    if args['day'] == 'friday':
+        out = lib.assign_friday(drivers, riders, args['debug'])
     else:
-        out = lib.assign_sunday(drivers, riders, debug)
+        out = lib.assign_sunday(drivers, riders, args['debug'])
     
     # Print output
-    if debug:
+    if args['debug']:
         print('Assignments output')
         print(out)
 
-    lib.write_assignments(out, update)
+    lib.write_assignments(out, args['update'])
 
 
 if __name__ == '__main__':
-    execute = True
-    update = True
-    fetch = True
-    debug = False
-    rotate = False
-    edit = False
-    friday = False
-    sunday = False
 
-    for argv in sys.argv[1:]:
-        if argv == '--help':
-            execute = False
-        elif argv == '--debug':
-            debug = True
-        elif argv == '--no-fetch':
-            fetch = False
-        elif argv == '--no-update':
-            update = False
-        elif argv == '--rotate':
-            rotate = True
-        elif argv == '--edit':
-            edit = True
-        elif argv == '--friday':
-            friday = True
-        elif argv == '--sunday':
-            sunday = True
-        elif argv.find('--threshold') != -1:
-            try:
-                GLOBALS[GROUPING_THRESHOLD] = int(argv.split('=').pop())
-            except:
-                execute = False
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--day', required=True, choices=['friday', 'sunday'],
+                        help='choose either \'friday\' for CL, or \'sunday\' for church')
+    parser.add_argument('--fetch', action=argparse.BooleanOptionalAction, default=True,
+                        help='choose whether to download Google Sheets data')
+    parser.add_argument('--update', action=argparse.BooleanOptionalAction, default=True,
+                        help='choose whether to upload output to Google Sheets')
+    parser.add_argument('--rotate', action='store_true',
+                        help='previous assignments are cleared and drivers are rotated based on date last driven')
+    parser.add_argument('--threshold', type=int, default=2, choices=range(1, 11),
+                        help='sets how many open spots a driver must have to spontaneously pick up at a neighboring location')
+    parser.add_argument('--debug', action='store_true',
+                        help='prints out debug statements while running')
     
-    valid_day = friday != sunday
-    valid_clear_opt = not (rotate and edit)
-    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (update or fetch) 
-    execute = execute and valid_day and valid_clear_opt and api_reqs_fulfilled
+    args = vars(parser.parse_args())
 
-    if execute:
-        main(fetch, update, rotate, edit, friday, debug)
-    elif not api_reqs_fulfilled:
+    GLOBALS[GROUPING_THRESHOLD] = args['threshold']
+
+    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args['update'] or args['fetch']) 
+    execute = api_reqs_fulfilled
+
+    if api_reqs_fulfilled:
+        main()
+    else:
         print(f'${SERVICE_ACCT_FILE} not found.')
         print('Make sure service_account.json is in the cfg directory.')
-        print("Contact Eric Pham if you don't have it.")
-    else:
-        show_usage()
+        print("Contact Timothy Wu if you don't have it.")
