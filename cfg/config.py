@@ -41,22 +41,6 @@ PERMANENT_RIDE_THERE_KEYWORD = 'yes'
 WEEKLY_RIDE_THERE_KEYWORD = 'there'
 RIDE_THERE_KEYWORD = 'yes'
 
-### For calculating assignments
-MARSHALL = 'Marshall'
-MUIR = 'Muir'
-ERC = 'ERC'
-REVELLE = 'Revelle'
-SIXTH = 'Sixth'
-SEVENTH = 'Seventh'
-EIGHTH = 'Eighth'
-WARREN = 'Warren'
-PEPPER_CANYON = 'Pepper Canyon Apts'
-RITA_ATKINSON = 'Rita Atkinson'
-REGENTS = 'Regents'
-COSTA_VERDE = 'Costa Verde'
-ALLINA_LA_JOLLA = 'Allina La Jolla'
-ELSEWHERE = 'ELSEWHERE'
-
 DRIVER_OPENINGS_KEY = 'Open seats'
 DRIVER_ROUTE_KEY = 'Locations'
 
@@ -67,23 +51,9 @@ GLOBALS = {                     # Use a dict in order to modify the global var l
 }
 
 # Route codes
-DEFAULT_LOCS_CODE = 0b0
-loc_map = {
-    EIGHTH:          0b0,
-    REVELLE:         0b0,
-    MUIR:            0b0,
-    SIXTH:           0b0,
-    MARSHALL:        0b0,
-    ERC:             0b0,
-    SEVENTH:         0b0,
-    WARREN:          0b0,
-    PEPPER_CANYON:   0b0,
-    RITA_ATKINSON:   0b0,
-    REGENTS:         0b0,
-    COSTA_VERDE:     0b0,
-    ALLINA_LA_JOLLA: 0b0,
-    ELSEWHERE:       0b0,
-}
+LOC_KEY_ELSEWHERE = 'ELSEWHERE'
+LOC_NONE = 0b0
+loc_map = {}
 
 # File paths
 import os

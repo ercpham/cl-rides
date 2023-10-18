@@ -103,7 +103,7 @@ def _add_temporaries(drivers_df: pd.DataFrame):
     """Adds temporary columns to the dataframes for calculating assignments.
     """
     drivers_df[DRIVER_OPENINGS_KEY] = drivers_df[DRIVER_CAPACITY_KEY]
-    drivers_df[DRIVER_ROUTE_KEY] = DEFAULT_LOCS_CODE
+    drivers_df[DRIVER_ROUTE_KEY] = LOC_NONE
 
 
 def _find_driver_cnt(drivers_df: pd.DataFrame, cnt_riders: int) -> int:
