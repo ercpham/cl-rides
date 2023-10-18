@@ -53,7 +53,9 @@ GLOBALS = {                     # Use a dict in order to modify the global var l
 # Route codes
 LOC_KEY_ELSEWHERE = 'ELSEWHERE'
 LOC_NONE = 0b0
-loc_map = {}
+loc_map = {
+    LOC_KEY_ELSEWHERE: LOC_NONE
+}
 
 # File paths
 import os
