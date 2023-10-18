@@ -10,9 +10,10 @@ try:
                 continue
             places = line.split(',')
             places = [place.strip() for place in places]
-            for key in loc_map:
-                if key in places:
-                    loc_map[key] |= loc
+            for place in places:
+                if place not in loc_map:
+                    loc_map[place] = LOC_NONE
+                loc_map[place] |= loc
             loc <<= 1
 except:
     print(f'${MAP_FILE} not loaded. Location optimizations are ignored.')
