@@ -66,7 +66,6 @@ if __name__ == '__main__':
     GLOBALS[GROUPING_THRESHOLD] = args['threshold']
 
     api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args['update'] or args['fetch']) 
-    execute = api_reqs_fulfilled
 
     if api_reqs_fulfilled:
         main()
