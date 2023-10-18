@@ -14,7 +14,7 @@ def show_usage() -> None:
     """ Show usage of rides.py
     """
     print('USAGE:')
-    print('python rides.py <--friday | --sunday> <--clear | --no-clear> [[FLAG] ...]')
+    print('python rides.py <--friday | --sunday> [[FLAG] ...]')
     print()
     print('FLAG')
     print('    --help                Shows usage')

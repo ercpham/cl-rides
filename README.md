@@ -10,6 +10,7 @@ Develop a Python script that turns Permanent and Weekly Rides Form outputs into 
 It will automatically assign riders to drivers every single week with the execution of a Python file.
 
 [Specification Document](https://docs.google.com/document/d/1Ube_m7H2BMxwY900dqZHqWQX3rRoPFq41DLoNI-5r6w/edit?usp=sharing)
+[Service Account Setup Tutorial](https://denisluiz.medium.com/python-with-google-sheets-service-account-step-by-step-8f74c26ed28e)
 
 ```
 USAGE:
@@ -47,8 +48,8 @@ This file tells the program how different pickup locations are situated around e
 The following is an example file for the UCSD campus.
 It simulates a path that goes from the southwest side of campus to the east.
 ```
-# West campus
 ELSEWHERE
+# West campus
 Revelle
 Muir
 Sixth
