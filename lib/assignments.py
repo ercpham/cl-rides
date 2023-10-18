@@ -110,7 +110,7 @@ def _add_rider(out: pd.DataFrame, r_idx: int, drivers_df: pd.DataFrame, d_idx: i
     """
     out.at[r_idx, OUTPUT_DRIVER_NAME_KEY] = drivers_df.at[d_idx, DRIVER_NAME_KEY]
     out.at[r_idx, OUTPUT_DRIVER_PHONE_KEY] = drivers_df.at[d_idx, DRIVER_PHONE_KEY]
-    out.at[r_idx, OUTPUT_DRIVER_CAPACITY_KEY] = '' #int(drivers_df.at[d_idx, DRIVER_CAPACITY_KEY])  # Chose not to include total seats
+    out.at[r_idx, OUTPUT_DRIVER_CAPACITY_KEY] = int(drivers_df.at[d_idx, DRIVER_CAPACITY_KEY])  # Chose not to include total seats
     rider_loc = loc_map.get(out.at[r_idx, RIDER_LOCATION_KEY], loc_map[LOC_KEY_ELSEWHERE])
     drivers_df.at[d_idx, DRIVER_OPENINGS_KEY] -= 1
     drivers_df.at[d_idx, DRIVER_ROUTE_KEY] |= rider_loc
