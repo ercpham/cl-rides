@@ -9,7 +9,7 @@ from lib.rides_data import *
 import pandas as pd
 
 
-def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, debug: bool = False) -> pd.DataFrame:
+def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns rider to drivers in the returned dataframe, and updates driver timestamp for the last time they drove.
 
     PRECONDITION: add_temporaries must have been called on drivers_df.
@@ -17,20 +17,18 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, debug: bool = Fals
     riders_df.sort_values(by=RIDER_LOCATION_KEY, inplace=True, key=lambda col: col.apply(lambda loc: loc_map.get(loc, loc_map[LOC_KEY_ELSEWHERE])))
     out = pd.concat([pd.DataFrame(columns=[OUTPUT_DRIVER_NAME_KEY, OUTPUT_DRIVER_PHONE_KEY, OUTPUT_DRIVER_CAPACITY_KEY]), riders_df[[RIDER_NAME_KEY, RIDER_PHONE_KEY, RIDER_LOCATION_KEY, RIDER_NOTES_KEY]]], axis='columns')
 
-    if debug:
-        print('Drivers')
-        print(drivers_df)
-        print('Riders')
-        print(riders_df)
-        print('Assigning started')
+    logging.debug('Drivers')
+    logging.debug(drivers_df)
+    logging.debug('Riders')
+    logging.debug(riders_df)
+    logging.debug('Assigning started')
 
     for r_idx in out.index:
         rider_loc = loc_map.get(out.at[r_idx, RIDER_LOCATION_KEY], loc_map[LOC_KEY_ELSEWHERE])
 
         if rider_loc == loc_map[LOC_KEY_ELSEWHERE]:
             #TODO: do not assign for now
-            if debug:
-                print(f'\t{out.at[r_idx, RIDER_NAME_KEY]} is not from a prerecorded location, assigning skipped')
+            logging.debug(f'\t{out.at[r_idx, RIDER_NAME_KEY]} is not from a prerecorded location, assigning skipped')
             continue
 
         is_matched = False
@@ -80,29 +78,28 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, debug: bool = Fals
     return out
 
 
-def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, debug: bool) -> pd.DataFrame:
+def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     drivers = prep.prep_necessary_drivers(drivers_df, len(riders_df))
-    out = assign(drivers, riders_df, debug)
-    post.alert_skipped_riders(out, debug)
+    out = assign(drivers, riders_df)
+    post.alert_skipped_riders(out)
     post.clean_output(out)
-    if debug:
-        print('Assigned Drivers')
-        print(drivers)
+    logging.debug('Assigned Drivers')
+    logging.debug(drivers)
     return out
 
 
-def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, debug: bool) -> pd.DataFrame:
+def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns Sunday rides.
     """
     riders = prep.filter_sunday(riders_df)
-    return organize(drivers_df, riders, debug)
+    return organize(drivers_df, riders)
 
 
-def assign_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, debug: bool) -> pd.DataFrame:
+def assign_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns Friday rides.
     """
     riders = prep.filter_friday(riders_df)
-    return organize(drivers_df, riders, debug)
+    return organize(drivers_df, riders)
 
 
 def _add_rider(out: pd.DataFrame, r_idx: int, drivers_df: pd.DataFrame, d_idx: int):
