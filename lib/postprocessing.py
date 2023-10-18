@@ -4,6 +4,7 @@
 from cfg.config import *
 import numpy as np
 import pandas as pd
+import logging
 
 
 def clean_output(out: pd.DataFrame):
@@ -31,11 +32,10 @@ def _format_output(out: pd.DataFrame):
             out.at[idx, OUTPUT_DRIVER_CAPACITY_KEY] = ''
 
 
-def alert_skipped_riders(out: pd.DataFrame, debug: bool):
+def alert_skipped_riders(out: pd.DataFrame):
     """Prints out all the riders who do not have a driver."""
-    if debug:
-        print("Printing stranded riders.")
-        for _, rider in out.iterrows():
-            if rider[OUTPUT_DRIVER_NAME_KEY] is np.NaN:
-                print(f'\t{rider[RIDER_NAME_KEY]} has no driver')
-        print()
+    logging.debug("Printing stranded riders.")
+    for _, rider in out.iterrows():
+        if rider[OUTPUT_DRIVER_NAME_KEY] is np.NaN:
+            logging.debug(f'\t{rider[RIDER_NAME_KEY]} has no driver')
+    logging.debug('')

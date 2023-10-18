@@ -8,6 +8,7 @@ from cfg.config import GLOBALS, GROUPING_THRESHOLD, SERVICE_ACCT_FILE
 import lib
 import os
 import argparse
+import logging
 
 
 def main() -> None:
@@ -18,8 +19,7 @@ def main() -> None:
         lib.update_pickles()
 
     # Print input
-    if args['debug']:
-        lib.print_pickles()
+    lib.print_pickles()
     
     (drivers, riders) = lib.get_cached_input()
     lib.clean_data(drivers, riders)
@@ -33,14 +33,13 @@ def main() -> None:
 
     # Execute the assignment algorithm
     if args['day'] == 'friday':
-        out = lib.assign_friday(drivers, riders, args['debug'])
+        out = lib.assign_friday(drivers, riders)
     else:
-        out = lib.assign_sunday(drivers, riders, args['debug'])
+        out = lib.assign_sunday(drivers, riders)
     
     # Print output
-    if args['debug']:
-        print('Assignments output')
-        print(out)
+    logging.debug('Assignments output')
+    logging.debug(out)
 
     lib.write_assignments(out, args['update'])
 
@@ -58,10 +57,12 @@ if __name__ == '__main__':
                         help='previous assignments are cleared and drivers are rotated based on date last driven')
     parser.add_argument('--threshold', type=int, default=2, choices=range(1, 11),
                         help='sets how many open spots a driver must have to spontaneously pick up at a neighboring location')
-    parser.add_argument('--debug', action='store_true',
-                        help='prints out debug statements while running')
+    parser.add_argument('--log', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+                        help='set a level of verbosity for logging')
     
     args = vars(parser.parse_args())
+
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=getattr(logging, args['log']))
 
     GLOBALS[GROUPING_THRESHOLD] = args['threshold']
 

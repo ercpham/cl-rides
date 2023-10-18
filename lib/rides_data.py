@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import pickle
 from typing import Tuple
+import logging
 
 
 def update_pickles():
@@ -37,11 +38,11 @@ def print_pickles():
         keys = json.load(gid_json).keys()
 
     for key in keys:
-        print(f'Printing {key}')
+        logging.debug(f'Printing {key}')
         with open(os.path.join(DATA_PATH, key), 'rb') as pickle_file:
             records = pickle.load(pickle_file)
             df = pd.DataFrame(records)
-            print(df)
+            logging.debug(df)
 
 
 def get_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
