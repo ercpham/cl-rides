@@ -71,6 +71,6 @@ if __name__ == '__main__':
     if api_reqs_fulfilled:
         main()
     else:
-        print(f'${SERVICE_ACCT_FILE} not found.')
-        print('Make sure service_account.json is in the cfg directory.')
-        print("Contact Timothy Wu if you don't have it.")
+        logging.critical(f'${SERVICE_ACCT_FILE} not found.')
+        logging.critical('Make sure service_account.json is in the cfg directory.')
+        logging.critical("Contact Timothy Wu if you don't have it.")

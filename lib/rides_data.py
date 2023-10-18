@@ -22,7 +22,7 @@ def update_pickles():
         gid_data = json.load(gid_json)
 
     for key in gid_data:
-        print(f'Fetching {key}')
+        logging.info(f'Fetching {key}')
         ws = gc.open_by_key(gid_data[key]).get_worksheet(0)
         records = ws.get_all_records()
         with open(os.path.join(DATA_PATH, key), 'wb') as pickle_file:
@@ -84,7 +84,7 @@ def get_cached_input() -> Tuple[pd.DataFrame, pd.DataFrame]:
 def write_assignments(assignments: pd.DataFrame, update: bool):
     """Write the given dataframe to the output file. If update is True, write to final Google Sheet.
     """
-    print('Writing assignments')
+    logging.info('Writing assignments')
     # write to pickle
     assignments.to_pickle(os.path.join(DATA_PATH, OUTPUT_SHEET_KEY))
 
