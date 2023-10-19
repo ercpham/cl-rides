@@ -51,6 +51,7 @@ CFG_PATH = os.path.dirname(os.path.realpath(__file__))
 MAP_FILE = os.path.join(CFG_PATH, 'map.txt')
 IGNORE_DRIVERS_FILE = os.path.join(CFG_PATH, 'ignore_drivers.txt')
 IGNORE_RIDERS_FILE = os.path.join(CFG_PATH, 'ignore_riders.txt')
+DRIVER_PREFS_FILE = os.path.join(CFG_PATH, 'driver_preferences.txt')
 SERVICE_ACCT_FILE = os.path.join(CFG_PATH, 'service_account.json')
 SHEET_IDS_FILE = os.path.join(CFG_PATH, 'sheet_ids.json')
 
@@ -69,10 +70,12 @@ GLOBALS = {                     # Use a dict in order to modify the global var l
 # Route codes
 LOC_KEY_ELSEWHERE = 'ELSEWHERE'
 LOC_NONE = 0b0
+
+# Configuration lists to be filled in later.
 LOC_MAP = {
     LOC_KEY_ELSEWHERE: LOC_NONE
 }
 
-# Lists to be filled later
 IGNORED_DRIVERS = []
 IGNORED_RIDERS = []
+DRIVER_PREFS = {}

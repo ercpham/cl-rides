@@ -4,6 +4,7 @@ Usage:
     usage: python rides.py [-h] --day {friday,sunday} [--fetch | --no-fetch] [--update | --no-update] [--rotate] [--threshold {1,2,3,4,5,6,7,8,9,10}] [--debug]
 """
 
+import cfg
 from cfg.config import GLOBALS, GROUPING_THRESHOLD, SERVICE_ACCT_FILE
 import lib
 import os
@@ -14,6 +15,9 @@ import logging
 def main() -> None:
     """ Assign riders to drivers, updating the sheet if specified
     """
+
+    cfg.load()
+
     # Fetch data from sheets
     if args['fetch']:
         lib.update_pickles()
