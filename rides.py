@@ -1,7 +1,8 @@
 """ Main file for automatic driver assignments.
 
 Usage:
-    usage: python rides.py [-h] --day {friday,sunday} [--fetch | --no-fetch] [--update | --no-update] [--rotate] [--threshold {1,2,3,4,5,6,7,8,9,10}] [--debug]
+    usage: rides.py [-h] --day {friday,sunday} [--fetch | --no-fetch] [--update | --no-update] [--rotate]
+                [--threshold {1,2,3,4,5,6,7,8,9,10}] [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
 """
 
 import cfg
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('--rotate', action='store_true',
                         help='previous assignments are cleared and drivers are rotated based on date last driven')
     parser.add_argument('--threshold', type=int, default=2, choices=range(1, 11),
-                        help='sets how many open spots a driver must have to spontaneously pick up at a neighboring location')
+                        help='set how many far a driver can be to pick up at a neighboring location')
     parser.add_argument('--log', default='INFO', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
                         help='set a level of verbosity for logging')
     
