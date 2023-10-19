@@ -11,9 +11,9 @@ try:
             places = line.split(',')
             places = [place.strip() for place in places]
             for place in places:
-                if place not in loc_map:
-                    loc_map[place] = LOC_NONE
-                loc_map[place] |= loc
+                if place not in LOC_MAP:
+                    LOC_MAP[place] = LOC_NONE
+                LOC_MAP[place] |= loc
             loc <<= 1
 except:
     print(f'${MAP_FILE} not loaded. Location optimizations are ignored.')
@@ -23,7 +23,7 @@ except:
 try:
     with open(IGNORE_DRIVERS_FILE, 'r') as nums:
         for num in nums:
-            ignored_drivers.append(num.strip())
+            IGNORED_DRIVERS.append(num.strip())
 except:
     print(f'${IGNORE_DRIVERS_FILE} not loaded. No drivers ignored.')
 
@@ -32,7 +32,7 @@ except:
 try:
     with open(IGNORE_RIDERS_FILE, 'r') as nums:
         for num in nums:
-            ignored_riders.append(num.strip())
+            IGNORED_RIDERS.append(num.strip())
 except:
     print(f'${IGNORE_RIDERS_FILE} not loaded. No riders ignored.')
 

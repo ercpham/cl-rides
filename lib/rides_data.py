@@ -18,7 +18,7 @@ def update_pickles():
     # connect Google Sheets
     gc = gspread.service_account(filename=SERVICE_ACCT_FILE)
 
-    with open(os.path.join(CFG_PATH, SHEET_ID_FILE)) as gid_json:
+    with open(os.path.join(CFG_PATH, SHEET_IDS_FILE)) as gid_json:
         gid_data = json.load(gid_json)
 
     for key in gid_data:
@@ -34,7 +34,7 @@ def print_pickles():
 
     There is no call to the Google Sheets API, so the printed data is from the last call to update_pickles.
     """
-    with open(os.path.join(CFG_PATH, SHEET_ID_FILE)) as gid_json:
+    with open(os.path.join(CFG_PATH, SHEET_IDS_FILE)) as gid_json:
         keys = json.load(gid_json).keys()
 
     for key in keys:
@@ -72,9 +72,9 @@ def get_cached_input() -> Tuple[pd.DataFrame, pd.DataFrame]:
     prep.standardize_weekly_responses(weekly_riders)
     
     # Reorder and rename columns before merging
-    weekly_riders = weekly_riders[[WEEKLY_RIDER_TIMESTAMP_KEY, WEEKLY_RIDER_NAME_KEY, WEEKLY_RIDER_PHONE_KEY, WEEKLY_RIDER_LOCATION_KEY, WEEKLY_RIDER_FRIDAY_KEY, WEEKLY_RIDER_SUNDAY_KEY, WEEKLY_RIDER_NOTES_KEY]]
-    weekly_riders.rename(columns={WEEKLY_RIDER_TIMESTAMP_KEY: RIDER_TIMESTAMP_KEY, WEEKLY_RIDER_NAME_KEY: RIDER_NAME_KEY, WEEKLY_RIDER_PHONE_KEY: RIDER_PHONE_KEY, WEEKLY_RIDER_LOCATION_KEY: RIDER_LOCATION_KEY, WEEKLY_RIDER_FRIDAY_KEY: RIDER_FRIDAY_KEY, WEEKLY_RIDER_SUNDAY_KEY: RIDER_SUNDAY_KEY, WEEKLY_RIDER_NOTES_KEY: RIDER_NOTES_KEY}, inplace=True)
-    permanent_riders.rename(columns={PERMANENT_RIDER_TIMESTAMP_KEY: RIDER_TIMESTAMP_KEY, PERMANENT_RIDER_NAME_KEY: RIDER_NAME_KEY, PERMANENT_RIDER_PHONE_KEY: RIDER_PHONE_KEY, PERMANENT_RIDER_LOCATION_KEY: RIDER_LOCATION_KEY, PERMANENT_RIDER_FRIDAY_KEY: RIDER_FRIDAY_KEY, PERMANENT_RIDER_SUNDAY_KEY: RIDER_SUNDAY_KEY, PERMANENT_RIDER_NOTES_KEY: RIDER_NOTES_KEY}, inplace=True)
+    weekly_riders = weekly_riders[[WEEKLY_RIDER_TIMESTAMP_HDR, WEEKLY_RIDER_NAME_HDR, WEEKLY_RIDER_PHONE_HDR, WEEKLY_RIDER_LOCATION_HDR, WEEKLY_RIDER_FRIDAY_HDR, WEEKLY_RIDER_SUNDAY_HDR, WEEKLY_RIDER_NOTES_HDR]]
+    weekly_riders.rename(columns={WEEKLY_RIDER_TIMESTAMP_HDR: RIDER_TIMESTAMP_HDR, WEEKLY_RIDER_NAME_HDR: RIDER_NAME_HDR, WEEKLY_RIDER_PHONE_HDR: RIDER_PHONE_HDR, WEEKLY_RIDER_LOCATION_HDR: RIDER_LOCATION_HDR, WEEKLY_RIDER_FRIDAY_HDR: RIDER_FRIDAY_HDR, WEEKLY_RIDER_SUNDAY_HDR: RIDER_SUNDAY_HDR, WEEKLY_RIDER_NOTES_HDR: RIDER_NOTES_HDR}, inplace=True)
+    permanent_riders.rename(columns={PERMANENT_RIDER_TIMESTAMP_HDR: RIDER_TIMESTAMP_HDR, PERMANENT_RIDER_NAME_HDR: RIDER_NAME_HDR, PERMANENT_RIDER_PHONE_HDR: RIDER_PHONE_HDR, PERMANENT_RIDER_LOCATION_HDR: RIDER_LOCATION_HDR, PERMANENT_RIDER_FRIDAY_HDR: RIDER_FRIDAY_HDR, PERMANENT_RIDER_SUNDAY_HDR: RIDER_SUNDAY_HDR, PERMANENT_RIDER_NOTES_HDR: RIDER_NOTES_HDR}, inplace=True)
     riders = pd.concat([permanent_riders, weekly_riders])
     riders.reset_index(inplace=True, drop=True)
 
@@ -89,7 +89,7 @@ def write_assignments(assignments: pd.DataFrame, update: bool):
     assignments.to_pickle(os.path.join(DATA_PATH, OUTPUT_SHEET_KEY))
 
     if update:
-        with open(SHEET_ID_FILE) as gid_json:
+        with open(SHEET_IDS_FILE) as gid_json:
             gid_data = json.load(gid_json)
 
         # connect Google Sheets
