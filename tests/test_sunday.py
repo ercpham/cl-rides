@@ -8,4 +8,13 @@ sys.path.append(os.path.dirname(curr))
 
 import rides
 
-rides.main(True, True, False, False, False, True)
+args = {
+    'day': 'sunday',
+    'fetch': True,
+    'update': True,
+    'rotate': False,
+    'threshold': 2,
+    'log': 'INFO'
+}
+
+rides.main(args)
