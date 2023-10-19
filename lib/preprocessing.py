@@ -104,10 +104,11 @@ def _add_temporaries(drivers_df: pd.DataFrame):
     """
     drivers_df[DRIVER_OPENINGS_HDR] = drivers_df[DRIVER_CAPACITY_HDR]
     drivers_df[DRIVER_ROUTE_HDR] = LOC_NONE
+    drivers_df[DRIVER_PREF_HDR] = LOC_NONE
 
     # Load driver location preferences
     for idx in drivers_df.index:
-        drivers_df.at[idx, DRIVER_ROUTE_HDR] = DRIVER_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], LOC_NONE)
+        drivers_df.at[idx, DRIVER_PREF_HDR] = DRIVER_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], LOC_NONE)
 
 
 def _find_driver_cnt(drivers_df: pd.DataFrame, cnt_riders: int) -> int:

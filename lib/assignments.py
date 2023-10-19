@@ -43,6 +43,16 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if is_matched:
             continue
 
+        # Check if a driver prefers to pick up there.
+        for d_idx, driver in drivers_df.iterrows():
+            if _prefers_there(driver, rider_loc):
+                _add_rider(out, r_idx, drivers_df, d_idx)
+                is_matched = True
+                break
+
+        if is_matched:
+            continue
+
         # If a driver is one spot away and are not going "out of their way".
         for d_idx, driver in drivers_df.iterrows():
             if _is_nearby_dist(driver, rider_loc, 1) and driver[DRIVER_OPENINGS_HDR] >= GLOBALS[GROUPING_THRESHOLD]:
@@ -73,7 +83,17 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if is_matched:
             continue
 
-        # Check if any driver is available.
+        # Check if any driver if free.
+        for d_idx, driver in drivers_df.iterrows():
+            if _is_free(driver):
+                _add_rider(out, r_idx, drivers_df, d_idx)
+                is_matched = True
+                break
+
+        if is_matched:
+            continue
+
+        # Check if any driver has an open seat.
         for d_idx, driver in drivers_df.iterrows():
             if _has_opening(driver):
                 _add_rider(out, r_idx, drivers_df, d_idx)
@@ -130,10 +150,10 @@ def _is_there(driver: pd.Series, rider_loc: int) -> bool:
     return _has_opening(driver) and _is_intersecting(driver, rider_loc)
 
 
-def _is_open(driver: pd.Series, rider_loc: int) -> bool:
-    """Checks if driver has no assignments.
+def _prefers_there(driver: pd.Series, rider_loc: int) -> bool:
+    """Checks if driver is already picking up at the same college as the rider.
     """
-    return _has_opening(driver) and _is_free(driver)
+    return _has_opening(driver) and (driver[DRIVER_PREF_HDR] & rider_loc) != 0
 
 
 def _has_opening(driver: pd.Series) -> bool:
@@ -143,9 +163,9 @@ def _has_opening(driver: pd.Series) -> bool:
 
 
 def _is_free(driver: pd.Series) -> bool:
-    """Checks if driver is completely free (no riders assigned).
+    """Checks if driver is completely free (no riders assigned, no preferences).
     """
-    return driver[DRIVER_ROUTE_HDR] == LOC_NONE
+    return driver[DRIVER_ROUTE_HDR] == LOC_NONE and driver[DRIVER_PREF_HDR] == LOC_NONE
 
 
 def _is_intersecting(driver: pd.Series, rider_loc: int) -> bool:

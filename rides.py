@@ -12,7 +12,7 @@ import argparse
 import logging
 
 
-def main() -> None:
+def main(args: dict) -> None:
     """ Assign riders to drivers, updating the sheet if specified
     """
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args['update'] or args['fetch']) 
 
     if api_reqs_fulfilled:
-        main()
+        main(args)
     else:
         logging.critical(f'${SERVICE_ACCT_FILE} not found.')
         logging.critical('Make sure service_account.json is in the cfg directory.')
