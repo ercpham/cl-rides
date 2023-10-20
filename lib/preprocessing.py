@@ -26,7 +26,7 @@ def sync_to_last_assignments(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, 
             # update driver stats, remove rider from form, transfer to synced dataframe
             drivers_df.at[d_idx, DRIVER_OPENINGS_HDR] -= 1
             entry = out.iloc[[idx]]
-            rider_loc = LOC_MAP.get(entry.at[entry.index[0], RIDER_LOCATION_HDR], LOC_MAP[ELSEWHERE])
+            rider_loc = LOC_MAP.get(entry.at[entry.index[0], RIDER_LOCATION_HDR], LOC_MAP[LOC_KEY_ELSEWHERE])
             drivers_df.at[d_idx, DRIVER_ROUTE_HDR] |= rider_loc
             riders_df.drop(riders_df[riders_df[RIDER_PHONE_HDR] == entry.at[entry.index[0], RIDER_PHONE_HDR]].index, inplace=True)
             synced_out = pd.concat([synced_out, entry])
@@ -39,16 +39,17 @@ def get_prev_driver_phones(prev_out: pd.DataFrame) -> set:
     """
     phone_nums = set()
     for phone in prev_out[OUTPUT_DRIVER_PHONE_HDR]:
-        phone_nums.add(phone)
+        phone_nums.add(str(phone))
     return phone_nums
 
 
 def rotate_drivers(drivers_df: pd.DataFrame, driver_nums: set):
     """Updates the driver's last driven date and rotates them accordingly.
     """
+    now = Timestamp.now()
     for idx in drivers_df.index:
         if drivers_df.at[idx, DRIVER_PHONE_HDR] in driver_nums:
-            drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = Timestamp.now()
+            drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True)
 
 
@@ -79,16 +80,20 @@ def standardize_weekly_responses(riders_df: pd.DataFrame):
         riders_df.at[idx, WEEKLY_RIDER_SUNDAY_HDR] = RIDE_THERE_KEYWORD if WEEKLY_RIDE_THERE_KEYWORD in response.lower() else ''
 
 
-def filter_friday(riders_df: pd.DataFrame) -> pd.DataFrame:
+def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     """Filters riders that will attend Friday College Life.
     """
-    return riders_df.copy()[riders_df[RIDER_FRIDAY_HDR] == RIDE_THERE_KEYWORD]
+    riders = riders_df.copy()[riders_df[RIDER_FRIDAY_HDR] == RIDE_THERE_KEYWORD]
+    drivers = drivers_df.copy()[drivers_df[DRIVER_AVAILABILITY_HDR].str.contains(DRIVER_FRIDAY_KEYWORD)]
+    return (drivers, riders)
 
 
-def filter_sunday(riders_df: pd.DataFrame) -> pd.DataFrame:
+def filter_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
     """Filters riders that will attend Sunday service.
     """
-    return riders_df.copy()[riders_df[RIDER_SUNDAY_HDR] == RIDE_THERE_KEYWORD]
+    riders = riders_df.copy()[riders_df[RIDER_SUNDAY_HDR] == RIDE_THERE_KEYWORD]
+    drivers = drivers_df.copy()[drivers_df[DRIVER_AVAILABILITY_HDR].str.contains(DRIVER_SUNDAY_KEYWORD)]
+    return (drivers, riders)
 
 
 def prep_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.DataFrame:
@@ -104,6 +109,11 @@ def _add_temporaries(drivers_df: pd.DataFrame):
     """
     drivers_df[DRIVER_OPENINGS_HDR] = drivers_df[DRIVER_CAPACITY_HDR]
     drivers_df[DRIVER_ROUTE_HDR] = LOC_NONE
+    drivers_df[DRIVER_PREF_HDR] = LOC_NONE
+
+    # Load driver location preferences
+    for idx in drivers_df.index:
+        drivers_df.at[idx, DRIVER_PREF_HDR] = DRIVER_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], LOC_NONE)
 
 
 def _find_driver_cnt(drivers_df: pd.DataFrame, cnt_riders: int) -> int:

@@ -22,7 +22,7 @@ def update_pickles():
         gid_data = json.load(gid_json)
 
     for key in gid_data:
-        logging.info(f'Fetching {key}')
+        logging.info(f'Downloading {key}')
         ws = gc.open_by_key(gid_data[key]).get_worksheet(0)
         records = ws.get_all_records()
         with open(os.path.join(DATA_PATH, key), 'wb') as pickle_file:
@@ -38,11 +38,10 @@ def print_pickles():
         keys = json.load(gid_json).keys()
 
     for key in keys:
-        logging.debug(f'Printing {key}')
         with open(os.path.join(DATA_PATH, key), 'rb') as pickle_file:
             records = pickle.load(pickle_file)
             df = pd.DataFrame(records)
-            logging.debug(df)
+            logging.debug(f'Printing {key}\n{df}')
 
 
 def get_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -98,6 +97,7 @@ def write_assignments(assignments: pd.DataFrame, update: bool):
 
         ws.resize(rows=len(assignments))
         ws.update([assignments.columns.values.tolist()] + assignments.values.tolist())
+        logging.info('Uploading assignments')
 
 
 def get_cached_output() -> pd.DataFrame:

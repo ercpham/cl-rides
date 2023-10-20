@@ -10,6 +10,7 @@ DRIVER_TIMESTAMP_HDR = 'Timestamp'
 DRIVER_NAME_HDR = 'Name'
 DRIVER_PHONE_HDR = 'Phone Number'
 DRIVER_CAPACITY_HDR = 'Number of Seats in Car (not including you)'
+DRIVER_AVAILABILITY_HDR = 'Check all that apply.'
 
 RIDER_TIMESTAMP_HDR = 'Timestamp'
 RIDER_NAME_HDR = 'Rider'
@@ -40,39 +41,46 @@ WEEKLY_RIDER_NOTES_HDR = 'Additional Comments / Questions / Concerns'
 PERMANENT_RIDE_THERE_KEYWORD = 'yes'
 WEEKLY_RIDE_THERE_KEYWORD = 'there'
 RIDE_THERE_KEYWORD = 'yes'
+DRIVER_FRIDAY_KEYWORD = 'College Life'
+DRIVER_SUNDAY_KEYWORD = 'Sunday'
 
+### Temporaries for drivers
 DRIVER_OPENINGS_HDR = 'Open seats'
 DRIVER_ROUTE_HDR = 'Locations'
+DRIVER_PREF_HDR = 'Preferred location'
 
-# File paths
+### File paths
 import os
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pickle')
 CFG_PATH = os.path.dirname(os.path.realpath(__file__))
 MAP_FILE = os.path.join(CFG_PATH, 'map.txt')
 IGNORE_DRIVERS_FILE = os.path.join(CFG_PATH, 'ignore_drivers.txt')
 IGNORE_RIDERS_FILE = os.path.join(CFG_PATH, 'ignore_riders.txt')
+DRIVER_PREFS_FILE = os.path.join(CFG_PATH, 'driver_preferences.txt')
 SERVICE_ACCT_FILE = os.path.join(CFG_PATH, 'service_account.json')
 SHEET_IDS_FILE = os.path.join(CFG_PATH, 'sheet_ids.json')
 
-# Sheet ID keys
+### Sheet ID keys
 PERMANENT_SHEET_KEY = 'permanent'
 WEEKLY_SHEET_KEY = 'weekly'
 DRIVER_SHEET_KEY = 'drivers'
 OUTPUT_SHEET_KEY = 'out'
 
-# The number of openings required for a car to freely pick up from a neighboring location
+### The number of openings required for a car to freely pick up from a neighboring location
 GROUPING_THRESHOLD = 'threshold'
 GLOBALS = {                     # Use a dict in order to modify the global var later
     GROUPING_THRESHOLD: 2
 }
 
-# Route codes
+### Route codes
 LOC_KEY_ELSEWHERE = 'ELSEWHERE'
 LOC_NONE = 0b0
+
+### Configuration lists to be filled in later.
 LOC_MAP = {
     LOC_KEY_ELSEWHERE: LOC_NONE
 }
 
-# Lists to be filled later
 IGNORED_DRIVERS = []
 IGNORED_RIDERS = []
+DRIVER_PREFS = {}

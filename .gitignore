@@ -8,7 +8,9 @@ pickle
 # User config files
 ignore_drivers.txt
 ignore_riders.txt
+driver_preferences.txt
 map.txt
 
 # Auto-generated
 __pycache__
+.vscode
