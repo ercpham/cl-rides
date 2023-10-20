@@ -10,6 +10,7 @@ DRIVER_TIMESTAMP_HDR = 'Timestamp'
 DRIVER_NAME_HDR = 'Name'
 DRIVER_PHONE_HDR = 'Phone Number'
 DRIVER_CAPACITY_HDR = 'Number of Seats in Car (not including you)'
+DRIVER_AVAILABILITY_HDR = 'Check all that apply.'
 
 RIDER_TIMESTAMP_HDR = 'Timestamp'
 RIDER_NAME_HDR = 'Rider'
@@ -40,6 +41,8 @@ WEEKLY_RIDER_NOTES_HDR = 'Additional Comments / Questions / Concerns'
 PERMANENT_RIDE_THERE_KEYWORD = 'yes'
 WEEKLY_RIDE_THERE_KEYWORD = 'there'
 RIDE_THERE_KEYWORD = 'yes'
+DRIVER_FRIDAY_KEYWORD = 'College Life'
+DRIVER_SUNDAY_KEYWORD = 'Sunday'
 
 ### Temporaries for drivers
 DRIVER_OPENINGS_HDR = 'Open seats'

@@ -102,15 +102,15 @@ def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns Sunday rides.
     """
-    riders = prep.filter_sunday(riders_df)
-    return organize(drivers_df, riders)
+    (drivers, riders) = prep.filter_sunday(drivers_df, riders_df)
+    return organize(drivers, riders)
 
 
 def assign_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns Friday rides.
     """
-    riders = prep.filter_friday(riders_df)
-    return organize(drivers_df, riders)
+    (drivers, riders) = prep.filter_friday(drivers_df, riders_df)
+    return organize(drivers, riders)
 
 
 def _add_rider(out: pd.DataFrame, r_idx: int, drivers_df: pd.DataFrame, d_idx: int):
