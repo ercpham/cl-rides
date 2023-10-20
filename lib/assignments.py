@@ -10,7 +10,7 @@ import pandas as pd
 
 
 def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
-    """Assigns rider to drivers in the returned dataframe, and updates driver timestamp for the last time they drove.
+    """Assigns rider to drivers in the returned dataframe.
 
     PRECONDITION: add_temporaries must have been called on drivers_df.
     """
@@ -28,7 +28,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
         if rider_loc == LOC_MAP[LOC_KEY_ELSEWHERE]:
             #TODO: do not assign for now
-            logging.debug(f'\t{out.at[r_idx, RIDER_NAME_HDR]} is not from a prerecorded location, assigning skipped')
+            logging.warn(f'{out.at[r_idx, RIDER_NAME_HDR]} is not from a prerecorded location, assigning skipped')
             continue
 
         is_matched = False
@@ -83,6 +83,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
                 _add_rider(out, r_idx, drivers_df, d_idx)
                 is_matched = True
                 break
+        
+        if not is_matched:
+            logging.warn(f'No driver available for {out.at[r_idx, RIDER_NAME_HDR]}')
 
     return out
 
@@ -92,8 +95,7 @@ def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     out = assign(drivers, riders_df)
     post.alert_skipped_riders(out)
     post.clean_output(out)
-    logging.debug('Assigned Drivers')
-    logging.debug(drivers)
+    logging.debug(f'Assigned Drivers\n{drivers}')
     return out
 
 

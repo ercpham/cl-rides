@@ -39,16 +39,17 @@ def get_prev_driver_phones(prev_out: pd.DataFrame) -> set:
     """
     phone_nums = set()
     for phone in prev_out[OUTPUT_DRIVER_PHONE_HDR]:
-        phone_nums.add(phone)
+        phone_nums.add(str(phone))
     return phone_nums
 
 
 def rotate_drivers(drivers_df: pd.DataFrame, driver_nums: set):
     """Updates the driver's last driven date and rotates them accordingly.
     """
+    now = Timestamp.now()
     for idx in drivers_df.index:
         if drivers_df.at[idx, DRIVER_PHONE_HDR] in driver_nums:
-            drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = Timestamp.now()
+            drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True)
 
 
