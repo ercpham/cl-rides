@@ -6,7 +6,7 @@ Usage:
 """
 
 import cfg
-from cfg.config import GLOBALS, GROUPING_THRESHOLD, SERVICE_ACCT_FILE
+from cfg.config import GLOBALS, DISTANCE_THRESHOLD, DISTANCE_MAX, VACANCY_THRESHOLD, VACANCY_MAX, SERVICE_ACCT_FILE
 import lib
 import os
 import argparse
@@ -60,8 +60,10 @@ if __name__ == '__main__':
                         help='choose whether to upload output to Google Sheets')
     parser.add_argument('--rotate', action='store_true',
                         help='previous assignments are cleared and drivers are rotated based on date last driven')
-    parser.add_argument('--threshold', type=int, default=2, choices=range(1, 11),
-                        help='set how many far a driver can be to pick up at a neighboring location')
+    parser.add_argument('--distance', type=int, default=2, choices=range(1, DISTANCE_MAX),
+                        help='set how many far a driver can be to pick up at a neighboring location before choosing a last resort driver')
+    parser.add_argument('--vacancy', type=int, default=2, choices=range(1, VACANCY_MAX),
+                        help='set how many open spots a driver must have to pick up at a neighboring location before choosing a last resort driver')
     parser.add_argument('--log', default='INFO', choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='set a level of verbosity for logging')
     
@@ -69,9 +71,10 @@ if __name__ == '__main__':
 
     logging.basicConfig(format='%(levelname)s:%(message)s', level=getattr(logging, args['log'].upper()))
 
-    GLOBALS[GROUPING_THRESHOLD] = args['threshold']
+    GLOBALS[DISTANCE_THRESHOLD] = args['distance']
+    GLOBALS[VACANCY_THRESHOLD] = args['vacancy']
 
-    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args['update'] or args['fetch']) 
+    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args['download'] or args['upload']) 
 
     if api_reqs_fulfilled:
         main(args)
