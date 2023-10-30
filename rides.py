@@ -35,7 +35,8 @@ def main(args: dict) -> None:
         # Rotate drivers by last date driven
         lib.rotate_drivers(drivers, lib.get_prev_driver_phones(prev_out))
         lib.update_drivers_locally(drivers)
-        logging.debug(f'Rotating drivers\n{drivers}')
+        logging.info('Rotating drivers')
+        logging.debug(drivers)
 
     # Execute the assignment algorithm
     if args['day'] == 'friday':
