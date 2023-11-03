@@ -102,7 +102,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
-    drivers = prep.prep_necessary_drivers(drivers_df, len(riders_df))
+    drivers = prep.fetch_necessary_drivers(drivers_df, len(riders_df))
     out = assign(drivers, riders_df)
     post.alert_skipped_riders(out)
     post.clean_output(out)
@@ -114,6 +114,7 @@ def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataF
     """Assigns Sunday rides.
     """
     (drivers, riders) = prep.filter_sunday(drivers_df, riders_df)
+    (drivers1, drivers2, riders1, riders2) = prep.split_sunday_services(drivers, riders)
     return organize(drivers, riders)
 
 

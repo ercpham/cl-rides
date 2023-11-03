@@ -96,12 +96,16 @@ def filter_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.Data
     return (drivers, riders)
 
 
-def prep_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.DataFrame:
+def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.DataFrame:
     driver_cnt = _find_driver_cnt(drivers_df, cnt_riders)
     drivers = drivers_df.copy()[:driver_cnt]
     drivers.sort_values(by=DRIVER_CAPACITY_HDR, ascending=False, inplace=True)
     _add_temporaries(drivers)
     return drivers
+
+
+def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame):
+    pass
 
 
 def _add_temporaries(drivers_df: pd.DataFrame):
