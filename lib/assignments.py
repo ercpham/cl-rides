@@ -78,9 +78,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             if is_matched:
                 break
 
-        # Check if any driver if free.
+        # Check if any driver if free that does not have a preferred location.
         for d_idx, driver in drivers_df.iterrows():
-            if _is_free(driver):
+            if _is_free(driver) and _has_no_preference(driver):
                 _add_rider(out, r_idx, drivers_df, d_idx)
                 is_matched = True
                 break
@@ -151,6 +151,12 @@ def _prefers_there(driver: pd.Series, rider_loc: int) -> bool:
     """Checks if driver is already picking up at the same college as the rider.
     """
     return _has_opening(driver) and (driver[DRIVER_PREF_HDR] & rider_loc) != 0
+
+
+def _has_no_preference(driver: pd.Series) -> bool:
+    """Checks if driver has a preference.
+    """
+    return driver[DRIVER_PREF_HDR] == 0
 
 
 def _has_opening(driver: pd.Series) -> bool:

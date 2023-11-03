@@ -48,7 +48,8 @@ def rotate_drivers(drivers_df: pd.DataFrame, driver_nums: set):
     """
     now = Timestamp.now()
     for idx in drivers_df.index:
-        if drivers_df.at[idx, DRIVER_PHONE_HDR] in driver_nums:
+        driver_phone = drivers_df.at[idx, DRIVER_PHONE_HDR]
+        if driver_phone in driver_nums and driver_phone not in DRIVER_PREFS:    # drivers with preferences are not rotated out
             drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True)
 
