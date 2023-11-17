@@ -12,7 +12,7 @@ def load_map(day: str):
     elif os.path.isfile(MAP_FILE):
         map_file = MAP_FILE
     else:
-        logging.info(f'${os.path.basename(MAP_FILE)} not loaded. Location optimizations are ignored.')
+        logging.info(f'{os.path.basename(specific_map)} and {os.path.basename(MAP_FILE)} not found. Location optimizations are ignored.')
         return
 
     cnt = 0
@@ -30,7 +30,7 @@ def load_map(day: str):
             loc <<= 1
             cnt += 1
 
-    logging.info(f'{os.path.basename(map_file)} loaded with width={cnt}.')
+    logging.info(f'{os.path.basename(map_file)} loaded with size={cnt}.')
 
 
 def load_ignored_drivers():
@@ -42,9 +42,9 @@ def load_ignored_drivers():
             for num in nums:
                 IGNORED_DRIVERS.append(num.strip())
                 cnt += 1
-        logging.info(f'Skipping {cnt} drivers.')
+        logging.info(f'Ignoring {cnt} drivers.')
     except:
-        logging.info(f'{os.path.basename(IGNORE_DRIVERS_FILE)} not loaded. No drivers ignored.')
+        logging.info(f'{os.path.basename(IGNORE_DRIVERS_FILE)} not found. No drivers ignored.')
 
 
 def load_ignored_riders():
@@ -56,9 +56,9 @@ def load_ignored_riders():
             for num in nums:
                 IGNORED_RIDERS.append(num.strip())
                 cnt += 1
-        logging.info(f'Skipping {cnt} riders.')
+        logging.info(f'Ignoring {cnt} riders.')
     except:
-        logging.info(f'{os.path.basename(IGNORE_RIDERS_FILE)} not loaded. No riders ignored.')
+        logging.info(f'{os.path.basename(IGNORE_RIDERS_FILE)} not found. No riders ignored.')
 
 
 def load_driver_prefs():
@@ -75,7 +75,7 @@ def load_driver_prefs():
                 cnt += 1
         logging.info(f'Loaded {cnt} driver preferences.')
     except:
-        logging.info(f'{os.path.basename(DRIVER_PREFS_FILE)} not loaded. No driver preferences.')
+        logging.info(f'{os.path.basename(DRIVER_PREFS_FILE)} not found. No driver preferences.')
 
 
 def create_pickles():

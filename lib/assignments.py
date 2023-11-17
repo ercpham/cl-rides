@@ -23,12 +23,13 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     logging.debug(riders_df)
     logging.debug('Assigning started')
 
+    num_skipped = 0
+
     for r_idx in out.index:
         rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_MAP[LOC_KEY_ELSEWHERE])
 
         if rider_loc == LOC_MAP[LOC_KEY_ELSEWHERE]:
-            #TODO: do not assign for now
-            logging.warn(f'{out.at[r_idx, RIDER_NAME_HDR]} is not from a prerecorded location, assigning skipped')
+            num_skipped += 1
             continue
 
         is_matched = False
@@ -97,6 +98,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         
         if not is_matched:
             logging.warn(f'No driver available for {out.at[r_idx, RIDER_NAME_HDR]}')
+    
+    if num_skipped > 0:
+        logging.warn(f'Skipped {num_skipped} riders, location ignored')
 
     return out
 
