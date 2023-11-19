@@ -17,7 +17,7 @@ def main(args: dict) -> None:
     """ Assign riders to drivers, updating the sheet if specified
     """
 
-    cfg.load()
+    cfg.load(args['day'])
 
     # Fetch data from sheets
     if args['download']:

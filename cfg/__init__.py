@@ -3,27 +3,34 @@ import logging
 import os
 
 
-def load_map():
+def load_map(day: str):
     """Loads map.txt into a dictionary of bitmaps for the hardcoded locations.
     """
-    try:
-        cnt = 0
-        with open(MAP_FILE, 'r') as map:
-            loc = 0b1
-            for line in map:
-                if (line.startswith('#')):
-                    continue
-                places = line.split(',')
-                places = [place.strip() for place in places]
-                for place in places:
-                    if place not in LOC_MAP:
-                        LOC_MAP[place] = LOC_NONE
-                    LOC_MAP[place] |= loc
-                loc <<= 1
-                cnt += 1
-        logging.info(f'Map loaded with width={cnt}.')
-    except:
-        logging.info(f'${os.path.basename(MAP_FILE)} not loaded. Location optimizations are ignored.')
+    specific_map = f'{os.path.dirname(MAP_FILE)}/{day}_{os.path.basename(MAP_FILE)}'
+    if os.path.isfile(specific_map):
+        map_file = specific_map
+    elif os.path.isfile(MAP_FILE):
+        map_file = MAP_FILE
+    else:
+        logging.info(f'{os.path.basename(specific_map)} and {os.path.basename(MAP_FILE)} not found. Location optimizations are ignored.')
+        return
+
+    cnt = 0
+    with open(map_file, 'r') as map:
+        loc = 0b1
+        for line in map:
+            if (line.startswith('#')):
+                continue
+            places = line.split(',')
+            places = [place.strip() for place in places]
+            for place in places:
+                if place not in LOC_MAP:
+                    LOC_MAP[place] = LOC_NONE
+                LOC_MAP[place] |= loc
+            loc <<= 1
+            cnt += 1
+
+    logging.info(f'{os.path.basename(map_file)} loaded with size={cnt}.')
 
 
 def load_ignored_drivers():
@@ -35,9 +42,9 @@ def load_ignored_drivers():
             for num in nums:
                 IGNORED_DRIVERS.append(num.strip())
                 cnt += 1
-        logging.info(f'Skipping {cnt} drivers.')
+        logging.info(f'Ignoring {cnt} drivers.')
     except:
-        logging.info(f'{os.path.basename(IGNORE_DRIVERS_FILE)} not loaded. No drivers ignored.')
+        logging.info(f'{os.path.basename(IGNORE_DRIVERS_FILE)} not found. No drivers ignored.')
 
 
 def load_ignored_riders():
@@ -49,9 +56,9 @@ def load_ignored_riders():
             for num in nums:
                 IGNORED_RIDERS.append(num.strip())
                 cnt += 1
-        logging.info(f'Skipping {cnt} riders.')
+        logging.info(f'Ignoring {cnt} riders.')
     except:
-        logging.info(f'{os.path.basename(IGNORE_RIDERS_FILE)} not loaded. No riders ignored.')
+        logging.info(f'{os.path.basename(IGNORE_RIDERS_FILE)} not found. No riders ignored.')
 
 
 def load_driver_prefs():
@@ -68,7 +75,7 @@ def load_driver_prefs():
                 cnt += 1
         logging.info(f'Loaded {cnt} driver preferences.')
     except:
-        logging.info(f'{os.path.basename(DRIVER_PREFS_FILE)} not loaded. No driver preferences.')
+        logging.info(f'{os.path.basename(DRIVER_PREFS_FILE)} not found. No driver preferences.')
 
 
 def create_pickles():
@@ -87,8 +94,8 @@ def create_pickles():
         pd.DataFrame().to_pickle(os.path.join(DATA_PATH, OUTPUT_SHEET_KEY))
 
 
-def load():
-    load_map()
+def load(day: str):
+    load_map(day)
     load_ignored_drivers()
     load_ignored_riders()
     load_driver_prefs()
