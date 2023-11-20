@@ -84,10 +84,15 @@ def standardize_weekly_responses(riders_df: pd.DataFrame):
 
 
 def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
-    """Filters riders that will attend Friday College Life.
+    """Filters riders that will attend Friday College Life AND are from campus.
     """
     riders = riders_df.copy()[riders_df[RIDER_FRIDAY_HDR] == RIDE_THERE_KEYWORD]
+    num_riders = len(riders.index)
+    riders = riders[riders[RIDER_LOCATION_HDR].isin(LOC_MAP)]
+    num_off_campus = len(riders.index)
+    num_on_campus = num_riders - num_off_campus
     drivers = drivers_df.copy()[drivers_df[DRIVER_AVAILABILITY_HDR].str.contains(DRIVER_FRIDAY_KEYWORD)]
+    logging.info(f"Skipping {num_on_campus} on-campus riders")
     return (drivers, riders)
 
 
