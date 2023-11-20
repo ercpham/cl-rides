@@ -89,12 +89,17 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if is_matched:
             continue
 
-        # Check if any driver has an open seat.
+        # Find open driver with lightest route.
+        open_driver_idx = -1
+        open_driver_found = False
         for d_idx, driver in drivers_df.iterrows():
             if _has_opening(driver):
-                _add_rider(out, r_idx, drivers_df, d_idx)
-                is_matched = True
-                break
+                if not open_driver_found or (_route_len(driver[DRIVER_ROUTE_HDR]) < _route_len(drivers_df.at[open_driver_idx, DRIVER_ROUTE_HDR])):
+                    open_driver_idx = d_idx
+                open_driver_found = True
+        if open_driver_found:
+            _add_rider(out, r_idx, drivers_df, open_driver_idx)
+            is_matched = True
         
         if not is_matched:
             logging.warn(f'No driver available for {out.at[r_idx, RIDER_NAME_HDR]}')
@@ -180,3 +185,13 @@ def _is_intersecting(driver: pd.Series, rider_loc: int) -> bool:
     """
     driver_loc = driver[DRIVER_ROUTE_HDR]
     return (driver_loc & rider_loc) != 0
+
+
+def _route_len(route: int) -> int:
+    """Returns the number of locations a driver is picking up from.
+    """
+    cnt = 0
+    while route != 0:
+        route &= route - 1
+        cnt += 1
+    return cnt
