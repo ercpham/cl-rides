@@ -123,7 +123,8 @@ def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataF
     """Assigns Sunday rides.
     """
     (drivers, riders) = prep.filter_sunday(drivers_df, riders_df)
-    (drivers1, drivers2, riders1, riders2) = prep.split_sunday_services(drivers, riders)
+    # TODO: split drivers and riders into 1st and 2nd service
+    # TODO: call organize for both services, then combine sheets
     return organize(drivers, riders)
 
 
