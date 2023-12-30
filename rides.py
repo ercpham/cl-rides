@@ -27,8 +27,16 @@ def main(args: dict) -> None:
     lib.print_pickles()
     
     (drivers, riders) = lib.get_cached_input()
-    lib.clean_data(drivers, riders)
 
+    if len(riders.index) == 0:
+        logging.error('No riders, aborting')
+        return
+    if len(drivers.index) == 0:
+        logging.error('No drivers, aborting')
+        return
+
+    lib.clean_data(drivers, riders)
+    
     # Do requested preprocessing
     if args['rotate']:
         prev_out = lib.get_cached_output()
