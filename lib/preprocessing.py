@@ -4,6 +4,7 @@
 from cfg.config import *
 import pandas as pd
 from sqlite3 import Timestamp
+import logging
 
 
 def sync_to_last_assignments(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, out: pd.DataFrame) -> pd.DataFrame:
@@ -48,9 +49,11 @@ def rotate_drivers(drivers_df: pd.DataFrame, driver_nums: set):
     """
     now = Timestamp.now()
     for idx in drivers_df.index:
-        if drivers_df.at[idx, DRIVER_PHONE_HDR] in driver_nums:
+        driver_phone = drivers_df.at[idx, DRIVER_PHONE_HDR]
+        if driver_phone in driver_nums and driver_phone not in DRIVER_PREFS:    # drivers with preferences are not rotated out
             drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True)
+    logging.debug(f"Rotated drivers:\n{drivers_df}")
 
 
 def clean_data(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):
@@ -81,10 +84,15 @@ def standardize_weekly_responses(riders_df: pd.DataFrame):
 
 
 def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
-    """Filters riders that will attend Friday College Life.
+    """Filters riders that will attend Friday College Life AND are from campus.
     """
     riders = riders_df.copy()[riders_df[RIDER_FRIDAY_HDR] == RIDE_THERE_KEYWORD]
+    num_riders = len(riders.index)
+    riders = riders[riders[RIDER_LOCATION_HDR].isin(LOC_MAP)]
+    num_off_campus = len(riders.index)
+    num_on_campus = num_riders - num_off_campus
     drivers = drivers_df.copy()[drivers_df[DRIVER_AVAILABILITY_HDR].str.contains(DRIVER_FRIDAY_KEYWORD)]
+    logging.info(f"Skipping {num_on_campus} on-campus riders")
     return (drivers, riders)
 
 
@@ -98,8 +106,10 @@ def filter_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.Data
 
 def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.DataFrame:
     driver_cnt = _find_driver_cnt(drivers_df, cnt_riders)
+    logging.debug(f"Drivers available:\n{drivers_df}")
     drivers = drivers_df.copy()[:driver_cnt]
     drivers.sort_values(by=DRIVER_CAPACITY_HDR, ascending=False, inplace=True)
+    logging.debug(f"Drivers used:\n{drivers}")
     _add_temporaries(drivers)
     return drivers
 

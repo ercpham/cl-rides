@@ -23,12 +23,13 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     logging.debug(riders_df)
     logging.debug('Assigning started')
 
+    num_skipped = 0
+
     for r_idx in out.index:
         rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_MAP[LOC_KEY_ELSEWHERE])
 
         if rider_loc == LOC_MAP[LOC_KEY_ELSEWHERE]:
-            #TODO: do not assign for now
-            logging.warn(f'{out.at[r_idx, RIDER_NAME_HDR]} is not from a prerecorded location, assigning skipped')
+            num_skipped += 1
             continue
 
         is_matched = False
@@ -78,9 +79,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             if is_matched:
                 break
 
-        # Check if any driver if free.
+        # Check if any driver if free that does not have a preferred location.
         for d_idx, driver in drivers_df.iterrows():
-            if _is_free(driver):
+            if _is_free(driver) and _has_no_preference(driver):
                 _add_rider(out, r_idx, drivers_df, d_idx)
                 is_matched = True
                 break
@@ -88,15 +89,23 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if is_matched:
             continue
 
-        # Check if any driver has an open seat.
+        # Find open driver with lightest route.
+        open_driver_idx = -1
+        open_driver_found = False
         for d_idx, driver in drivers_df.iterrows():
             if _has_opening(driver):
-                _add_rider(out, r_idx, drivers_df, d_idx)
-                is_matched = True
-                break
+                if not open_driver_found or (_route_len(driver[DRIVER_ROUTE_HDR]) < _route_len(drivers_df.at[open_driver_idx, DRIVER_ROUTE_HDR])):
+                    open_driver_idx = d_idx
+                open_driver_found = True
+        if open_driver_found:
+            _add_rider(out, r_idx, drivers_df, open_driver_idx)
+            is_matched = True
         
         if not is_matched:
             logging.warn(f'No driver available for {out.at[r_idx, RIDER_NAME_HDR]}')
+    
+    if num_skipped > 0:
+        logging.warn(f'Skipped {num_skipped} riders, location ignored')
 
     return out
 
@@ -154,6 +163,12 @@ def _prefers_there(driver: pd.Series, rider_loc: int) -> bool:
     return _has_opening(driver) and (driver[DRIVER_PREF_HDR] & rider_loc) != 0
 
 
+def _has_no_preference(driver: pd.Series) -> bool:
+    """Checks if driver has a preference.
+    """
+    return driver[DRIVER_PREF_HDR] == 0
+
+
 def _has_opening(driver: pd.Series) -> bool:
     """Checks if driver has space to take a rider.
     """
@@ -171,3 +186,13 @@ def _is_intersecting(driver: pd.Series, rider_loc: int) -> bool:
     """
     driver_loc = driver[DRIVER_ROUTE_HDR]
     return (driver_loc & rider_loc) != 0
+
+
+def _route_len(route: int) -> int:
+    """Returns the number of locations a driver is picking up from.
+    """
+    cnt = 0
+    while route != 0:
+        route &= route - 1
+        cnt += 1
+    return cnt

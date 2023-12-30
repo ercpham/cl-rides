@@ -9,7 +9,7 @@ pickle
 ignore_drivers.txt
 ignore_riders.txt
 driver_preferences.txt
-map.txt
+*map.txt
 
 # Auto-generated
 __pycache__
