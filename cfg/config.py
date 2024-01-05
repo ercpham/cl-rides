@@ -60,7 +60,7 @@ CFG_PATH = os.path.dirname(os.path.realpath(__file__))
 MAP_FILE = os.path.join(CFG_PATH, 'map.txt')
 IGNORE_DRIVERS_FILE = os.path.join(CFG_PATH, 'ignore_drivers.txt')
 IGNORE_RIDERS_FILE = os.path.join(CFG_PATH, 'ignore_riders.txt')
-DRIVER_PREFS_FILE = os.path.join(CFG_PATH, 'driver_preferences.txt')
+DRIVER_PREFS_FILE = os.path.join(CFG_PATH, 'driver_preferences.csv')
 SERVICE_ACCT_FILE = os.path.join(CFG_PATH, 'service_account.json')
 SHEET_IDS_FILE = os.path.join(CFG_PATH, 'sheet_ids.json')
 

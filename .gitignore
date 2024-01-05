@@ -8,7 +8,7 @@ pickle
 # User config files
 ignore_drivers.txt
 ignore_riders.txt
-driver_preferences.txt
+driver_preferences.csv
 *map.txt
 
 # Auto-generated

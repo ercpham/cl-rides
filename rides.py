@@ -1,8 +1,4 @@
 """ Main file for automatic driver assignments.
-
-Usage:
-    usage: rides.py [-h] --day {friday,sunday} [--fetch | --no-fetch] [--update | --no-update] [--rotate]
-                [--threshold {1,2,3,4,5,6,7,8,9,10}] [--log {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
 """
 
 import cfg
