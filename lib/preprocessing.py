@@ -105,6 +105,8 @@ def filter_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.Data
 
 
 def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.DataFrame:
+    """Reduces the list of drivers to the minimum necessary to offer rides.
+    """
     driver_cnt = _find_driver_cnt(drivers_df, cnt_riders)
     logging.debug(f"Drivers available:\n{drivers_df}")
     drivers = drivers_df.copy()[:driver_cnt]
@@ -115,6 +117,10 @@ def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.Dat
 
 
 def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame):
+    """Splits the lists into first and second service lists.
+    @returns (drivers1, riders1, drivers2, riders2)
+    """
+    
     pass
 
 

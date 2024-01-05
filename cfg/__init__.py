@@ -69,8 +69,8 @@ def load_driver_prefs():
         with open(DRIVER_PREFS_FILE, 'r') as prefs:
             for pref in prefs:
                 pref = pref.split(',')
-                phone = pref[0].strip()
-                loc = pref[1].strip()
+                phone = pref[1].strip()
+                loc = pref[2].strip()
                 DRIVER_PREFS[phone] = LOC_MAP.get(loc, LOC_NONE)
                 cnt += 1
         logging.info(f'Loaded {cnt} driver preferences.')
