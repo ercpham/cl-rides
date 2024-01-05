@@ -50,7 +50,7 @@ def rotate_drivers(drivers_df: pd.DataFrame, driver_nums: set):
     now = Timestamp.now()
     for idx in drivers_df.index:
         driver_phone = drivers_df.at[idx, DRIVER_PHONE_HDR]
-        if driver_phone in driver_nums and driver_phone not in DRIVER_PREFS:    # drivers with preferences are not rotated out
+        if driver_phone in driver_nums and driver_phone not in DRIVER_LOC_PREFS:    # drivers with preferences are not rotated out
             drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True)
     logging.debug(f"Rotated drivers:\n{drivers_df}")
@@ -112,7 +112,6 @@ def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.Dat
     drivers = drivers_df.copy()[:driver_cnt]
     drivers.sort_values(by=DRIVER_CAPACITY_HDR, ascending=False, inplace=True)
     logging.debug(f"Drivers used:\n{drivers}")
-    _add_temporaries(drivers)
     return drivers
 
 
@@ -120,25 +119,62 @@ def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> 
     """Splits the lists into first and second service lists.
     @returns (drivers1, riders1, drivers2, riders2)
     """
-    
-    pass
+
+    _add_service_vars(drivers_df, riders_df)
+    drivers1 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == FIRST_SERVICE]
+    drivers2 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == SECOND_SERVICE]
+    riders1  = riders_df[riders_df[RIDER_SERVICE_HDR] == FIRST_SERVICE].copy()
+    riders2  = riders_df[riders_df[RIDER_SERVICE_HDR] == SECOND_SERVICE].copy()
+    return (drivers1, riders1, drivers2, riders2)
 
 
-def _add_temporaries(drivers_df: pd.DataFrame):
+def add_assignment_vars(drivers_df: pd.DataFrame):
     """Adds temporary columns to the dataframes for calculating assignments.
     """
     drivers_df[DRIVER_OPENINGS_HDR] = drivers_df[DRIVER_CAPACITY_HDR]
     drivers_df[DRIVER_ROUTE_HDR] = LOC_NONE
-    drivers_df[DRIVER_PREF_HDR] = LOC_NONE
+    drivers_df[DRIVER_PREF_LOC_HDR] = LOC_NONE
 
     # Load driver location preferences
     for idx in drivers_df.index:
-        drivers_df.at[idx, DRIVER_PREF_HDR] = DRIVER_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], LOC_NONE)
+        drivers_df.at[idx, DRIVER_PREF_LOC_HDR] = DRIVER_LOC_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], LOC_NONE)
+
+
+def _add_service_vars(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):
+    """Adds temporary columns to the dataframes for splitting between first and second service.
+    """
+    drivers_df[DRIVER_SERVICE_HDR] = 0
+    for idx in drivers_df.index:
+        drivers_df.at[idx, DRIVER_SERVICE_HDR] = DRIVER_SERVICE_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], ARGS['main_service'])
+
+    riders_df[RIDER_SERVICE_HDR] = 0
+    for idx in riders_df.index:
+        riders_df.at[idx, RIDER_SERVICE_HDR] = _parse_service(riders_df.at[idx, RIDER_NOTES_HDR])
+
+
+def _parse_service(s: str) -> str:
+    if _requested_first_service(s):
+        return FIRST_SERVICE
+    elif _requested_second_service(s):
+        return SECOND_SERVICE
+    else:
+        return ARGS['main_service']
+
+
+def _requested_first_service(s: str) -> bool:
+    s = s.lower()
+    return 'first' in s or '1st' in s or '8' in s
+
+
+def _requested_second_service(s: str) -> bool:
+    s = s.lower()
+    return 'second' in s or '2nd' in s or '10' in s or '11' in s
 
 
 def _find_driver_cnt(drivers_df: pd.DataFrame, cnt_riders: int) -> int:
     """Determines how many drivers are needed to give rides to all the riders.
     """
+    cnt = 0 # handle zero case
     for cnt, idx in enumerate(drivers_df.index):
         if cnt_riders > 0:
             cnt_riders -= drivers_df.at[idx, DRIVER_CAPACITY_HDR]

@@ -44,10 +44,14 @@ RIDE_THERE_KEYWORD = 'yes'
 DRIVER_FRIDAY_KEYWORD = 'College Life'
 DRIVER_SUNDAY_KEYWORD = 'Sunday'
 
-### Temporaries for drivers
+### Temporaries for assignments
 DRIVER_OPENINGS_HDR = 'Open seats'
 DRIVER_ROUTE_HDR = 'Locations'
-DRIVER_PREF_HDR = 'Preferred location'
+DRIVER_PREF_LOC_HDR = 'Preferred location'
+
+### Temporaries for splitting services
+DRIVER_SERVICE_HDR = 'Service'
+RIDER_SERVICE_HDR = 'Preferred service'
 
 ### File paths
 import os
@@ -82,4 +86,7 @@ LOC_MAP = {
 
 IGNORED_DRIVERS = []
 IGNORED_RIDERS = []
-DRIVER_PREFS = {}
+DRIVER_LOC_PREFS = {}
+DRIVER_SERVICE_PREFS = {}
+FIRST_SERVICE = '1'
+SECOND_SERVICE = '2'

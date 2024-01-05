@@ -11,9 +11,8 @@ import pandas as pd
 
 def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns rider to drivers in the returned dataframe.
-
-    PRECONDITION: add_temporaries must have been called on drivers_df.
     """
+    prep.add_assignment_vars(drivers_df)
     riders_df.sort_values(by=RIDER_LOCATION_HDR, inplace=True, key=lambda col: col.apply(lambda loc: LOC_MAP.get(loc, LOC_MAP[LOC_KEY_ELSEWHERE])))
     out = pd.concat([pd.DataFrame(columns=[OUTPUT_DRIVER_NAME_HDR, OUTPUT_DRIVER_PHONE_HDR, OUTPUT_DRIVER_CAPACITY_HDR]), riders_df[[RIDER_NAME_HDR, RIDER_PHONE_HDR, RIDER_LOCATION_HDR, RIDER_NOTES_HDR]]], axis='columns')
 
@@ -123,9 +122,12 @@ def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataF
     """Assigns Sunday rides.
     """
     (drivers, riders) = prep.filter_sunday(drivers_df, riders_df)
-    # TODO: split drivers and riders into 1st and 2nd service
-    # TODO: call organize for both services, then combine sheets
-    return organize(drivers, riders)
+    (drivers1, riders1, drivers2, riders2) = prep.split_sunday_services(drivers, riders)
+
+    assignments1 = organize(drivers1, riders1)
+    assignments2 = organize(drivers2, riders2)
+
+    return pd.concat([assignments1, assignments2])
 
 
 def assign_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
@@ -161,13 +163,13 @@ def _is_there(driver: pd.Series, rider_loc: int) -> bool:
 def _prefers_there(driver: pd.Series, rider_loc: int) -> bool:
     """Checks if driver is already picking up at the same college as the rider.
     """
-    return _has_opening(driver) and (driver[DRIVER_PREF_HDR] & rider_loc) != 0
+    return _has_opening(driver) and (driver[DRIVER_PREF_LOC_HDR] & rider_loc) != 0
 
 
 def _has_no_preference(driver: pd.Series) -> bool:
     """Checks if driver has a preference.
     """
-    return driver[DRIVER_PREF_HDR] == 0
+    return driver[DRIVER_PREF_LOC_HDR] == 0
 
 
 def _has_opening(driver: pd.Series) -> bool:
@@ -179,7 +181,7 @@ def _has_opening(driver: pd.Series) -> bool:
 def _is_free(driver: pd.Series) -> bool:
     """Checks if driver is completely free (no riders assigned, no preferences).
     """
-    return driver[DRIVER_ROUTE_HDR] == LOC_NONE and driver[DRIVER_PREF_HDR] == LOC_NONE
+    return driver[DRIVER_ROUTE_HDR] == LOC_NONE and driver[DRIVER_PREF_LOC_HDR] == LOC_NONE
 
 
 def _is_intersecting(driver: pd.Series, rider_loc: int) -> bool:

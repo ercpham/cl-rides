@@ -71,7 +71,11 @@ def load_driver_prefs():
                 pref = pref.split(',')
                 phone = pref[1].strip()
                 loc = pref[2].strip()
-                DRIVER_PREFS[phone] = LOC_MAP.get(loc, LOC_NONE)
+                service = pref[3].strip()
+                if loc != '':
+                    DRIVER_LOC_PREFS[phone] = LOC_MAP.get(loc, LOC_NONE)
+                if service != '':
+                    DRIVER_SERVICE_PREFS[phone] = service
                 cnt += 1
         logging.info(f'Loaded {cnt} driver preferences.')
     except:

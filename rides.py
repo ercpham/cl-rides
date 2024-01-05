@@ -6,7 +6,7 @@ Usage:
 """
 
 import cfg
-from cfg.config import DISTANCE_MAX, VACANCY_MAX, SERVICE_ACCT_FILE
+from cfg.config import DISTANCE_MAX, VACANCY_MAX, SERVICE_ACCT_FILE, FIRST_SERVICE, SECOND_SERVICE
 import lib
 import os
 import argparse
@@ -85,7 +85,7 @@ if __name__ == '__main__':
                         help='set how many open spots a driver must have to pick up at a neighboring location before choosing a last resort driver')
     parser.add_argument('--log', default='INFO', choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='set a level of verbosity for logging')
-    parser.add_argument('--main-service', type=int, default=2, choices=[1, 2],
+    parser.add_argument('--main-service', default=SECOND_SERVICE, choices=[FIRST_SERVICE, SECOND_SERVICE],
                         help='select the main Sunday service (i.e. select 1st service during weeks with ACE classes)')
     
     args = vars(parser.parse_args())
