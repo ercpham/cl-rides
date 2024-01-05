@@ -108,10 +108,10 @@ def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.Dat
     """Reduces the list of drivers to the minimum necessary to offer rides.
     """
     driver_cnt = _find_driver_cnt(drivers_df, cnt_riders)
-    logging.debug(f"Drivers available:\n{drivers_df}")
+    logging.debug(f"FETCH_NECESSARY_DRIVERS --- Drivers available:\n{drivers_df}")
     drivers = drivers_df.copy()[:driver_cnt]
     drivers.sort_values(by=DRIVER_CAPACITY_HDR, ascending=False, inplace=True)
-    logging.debug(f"Drivers used:\n{drivers}")
+    logging.debug(f"FETCH_NECESSARY_DRIVERS --- Drivers used:\n{drivers}")
     return drivers
 
 
@@ -174,10 +174,11 @@ def _requested_second_service(s: str) -> bool:
 def _find_driver_cnt(drivers_df: pd.DataFrame, cnt_riders: int) -> int:
     """Determines how many drivers are needed to give rides to all the riders.
     """
-    cnt = 0 # handle zero case
-    for cnt, idx in enumerate(drivers_df.index):
+    cnt = 0
+    for _, idx in enumerate(drivers_df.index):
         if cnt_riders > 0:
             cnt_riders -= drivers_df.at[idx, DRIVER_CAPACITY_HDR]
+            cnt += 1
         else:
             break
     return cnt
