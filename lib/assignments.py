@@ -7,6 +7,7 @@ import lib.postprocessing as post
 import lib.preprocessing as prep
 from lib.rides_data import *
 import pandas as pd
+import numpy as np
 
 
 def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
@@ -24,14 +25,12 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
     num_skipped = 0
 
+    # Assign drivers with preferences first
     for r_idx in out.index:
         rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_MAP[LOC_KEY_ELSEWHERE])
 
         if rider_loc == LOC_MAP[LOC_KEY_ELSEWHERE]:
-            num_skipped += 1
             continue
-
-        is_matched = False
 
         # Check if a driver prefers to pick up there.
         for d_idx, driver in drivers_df.iterrows():
@@ -40,8 +39,18 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
                 is_matched = True
                 break
 
-        if is_matched:
+    for r_idx in out.index:
+        # Check if already assigned to a driver with a preference
+        if type(out.at[r_idx, OUTPUT_DRIVER_NAME_HDR]) is str:
             continue
+
+        rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_MAP[LOC_KEY_ELSEWHERE])
+
+        if rider_loc == LOC_MAP[LOC_KEY_ELSEWHERE]:
+            num_skipped += 1
+            continue
+
+        is_matched = False
 
         # Check if a driver is already there.
         for d_idx, driver in drivers_df.iterrows():
@@ -78,9 +87,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             if is_matched:
                 break
 
-        # Check if any driver if free that does not have a preferred location.
+        # Check if any driver is open that does not have a preferred location.
         for d_idx, driver in drivers_df.iterrows():
-            if _is_free(driver) and _has_no_preference(driver):
+            if _has_opening(driver):
                 _add_rider(out, r_idx, drivers_df, d_idx)
                 is_matched = True
                 break
@@ -164,12 +173,6 @@ def _prefers_there(driver: pd.Series, rider_loc: int) -> bool:
     """Checks if driver is already picking up at the same college as the rider.
     """
     return _has_opening(driver) and (driver[DRIVER_PREF_LOC_HDR] & rider_loc) != 0
-
-
-def _has_no_preference(driver: pd.Series) -> bool:
-    """Checks if driver has a preference.
-    """
-    return driver[DRIVER_PREF_LOC_HDR] == 0
 
 
 def _has_opening(driver: pd.Series) -> bool:
