@@ -87,6 +87,8 @@ if __name__ == '__main__':
                         help='set a level of verbosity for logging')
     parser.add_argument('--main-service', default=SECOND_SERVICE, choices=[FIRST_SERVICE, SECOND_SERVICE],
                         help='select the main Sunday service (i.e. select 1st service during weeks with ACE classes)')
+    parser.add_argument('--just-weekly', action='store_true',
+                        help='use only the weekly rides for for these assignments')
     
     args = vars(parser.parse_args())
 
