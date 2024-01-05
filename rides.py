@@ -6,7 +6,7 @@ Usage:
 """
 
 import cfg
-from cfg.config import GLOBALS, DISTANCE_THRESHOLD, DISTANCE_MAX, VACANCY_THRESHOLD, VACANCY_MAX, SERVICE_ACCT_FILE
+from cfg.config import DISTANCE_MAX, VACANCY_MAX, SERVICE_ACCT_FILE, FIRST_SERVICE, SECOND_SERVICE
 import lib
 import os
 import argparse
@@ -17,7 +17,17 @@ def main(args: dict) -> None:
     """ Assign riders to drivers, updating the sheet if specified
     """
 
-    cfg.load(args['day'])
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=getattr(logging, args['log'].upper()))
+
+    # Continue only if service_account.json exists for accessing the Google Sheets data
+    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args['download'] or args['upload']) 
+    if not api_reqs_fulfilled:
+        logging.critical(f'${SERVICE_ACCT_FILE} not found.')
+        logging.critical('Make sure service_account.json is in the cfg directory.')
+        logging.critical("Contact Timothy Wu if you don't have it.")
+        return
+
+    cfg.load(args)
 
     # Fetch data from sheets
     if args['download']:
@@ -75,19 +85,9 @@ if __name__ == '__main__':
                         help='set how many open spots a driver must have to pick up at a neighboring location before choosing a last resort driver')
     parser.add_argument('--log', default='INFO', choices=['debug', 'info', 'warning', 'error', 'critical'],
                         help='set a level of verbosity for logging')
+    parser.add_argument('--main-service', default=SECOND_SERVICE, choices=[FIRST_SERVICE, SECOND_SERVICE],
+                        help='select the main Sunday service (i.e. select 1st service during weeks with ACE classes)')
     
     args = vars(parser.parse_args())
 
-    logging.basicConfig(format='%(levelname)s:%(message)s', level=getattr(logging, args['log'].upper()))
-
-    GLOBALS[DISTANCE_THRESHOLD] = args['distance']
-    GLOBALS[VACANCY_THRESHOLD] = args['vacancy']
-
-    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args['download'] or args['upload']) 
-
-    if api_reqs_fulfilled:
-        main(args)
-    else:
-        logging.critical(f'${SERVICE_ACCT_FILE} not found.')
-        logging.critical('Make sure service_account.json is in the cfg directory.')
-        logging.critical("Contact Timothy Wu if you don't have it.")
+    main(args);

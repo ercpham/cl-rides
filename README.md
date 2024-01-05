@@ -10,22 +10,28 @@ Develop a Python script that turns Permanent and Weekly Rides Form outputs into 
 It will automatically assign riders to drivers every single week with the execution of a Python file.
 
 [Specification Document](https://docs.google.com/document/d/1Ube_m7H2BMxwY900dqZHqWQX3rRoPFq41DLoNI-5r6w/edit?usp=sharing)
+
 [Service Account Setup Tutorial](https://denisluiz.medium.com/python-with-google-sheets-service-account-step-by-step-8f74c26ed28e)
 
 ```
-USAGE:
-python rides.py <--friday | --sunday> [[FLAG] ...]
+usage: rides.py [-h] --day {friday,sunday} [--download | --no-download] [--upload | --no-upload] [--rotate] [--distance {1,2,3,4,5,6,7,8,9}]
+                [--vacancy {1,2,3,4,5,6,7,8,9}] [--log {debug,info,warning,error,critical}]
 
-FLAG
-    --friday              Assigns rides for Friday College Life
-    --sunday              Assigns rides for Sunday service
-    --rotate              Previous assignments are cleared and drivers are rotated based on date last driven
-    --edit                Previous assignments are retained and new assignments are appended
-    --no-fetch            Prevents new sheet data from being fetched
-    --no-update           Prevents the output sheet from being updated
-    --threshold=<num>     Sets how many open spots a driver must have to spontaneously pick up at a neighboring location. The default is 2.
-    --help                Shows usage
-    --debug               Prints out debug statements while running
+options:
+  -h, --help            show this help message and exit
+  --day {friday,sunday}
+                        choose either 'friday' for CL, or 'sunday' for church
+  --download, --no-download
+                        choose whether to download Google Sheets data (default: True)
+  --upload, --no-upload
+                        choose whether to upload output to Google Sheets (default: True)
+  --rotate              previous assignments are cleared and drivers are rotated based on date last driven
+  --distance {1,2,3,4,5,6,7,8,9}
+                        set how many far a driver can be to pick up at a neighboring location before choosing a last resort driver
+  --vacancy {1,2,3,4,5,6,7,8,9}
+                        set how many open spots a driver must have to pick up at a neighboring location before choosing a last resort driver
+  --log {debug,info,warning,error,critical}
+                        set a level of verbosity for logging
 ```
 
 ## Setup

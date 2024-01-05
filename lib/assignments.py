@@ -7,13 +7,13 @@ import lib.postprocessing as post
 import lib.preprocessing as prep
 from lib.rides_data import *
 import pandas as pd
+import numpy as np
 
 
 def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns rider to drivers in the returned dataframe.
-
-    PRECONDITION: add_temporaries must have been called on drivers_df.
     """
+    prep.add_assignment_vars(drivers_df)
     riders_df.sort_values(by=RIDER_LOCATION_HDR, inplace=True, key=lambda col: col.apply(lambda loc: LOC_MAP.get(loc, LOC_MAP[LOC_KEY_ELSEWHERE])))
     out = pd.concat([pd.DataFrame(columns=[OUTPUT_DRIVER_NAME_HDR, OUTPUT_DRIVER_PHONE_HDR, OUTPUT_DRIVER_CAPACITY_HDR]), riders_df[[RIDER_NAME_HDR, RIDER_PHONE_HDR, RIDER_LOCATION_HDR, RIDER_NOTES_HDR]]], axis='columns')
 
@@ -25,14 +25,12 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
     num_skipped = 0
 
+    # Assign drivers with preferences first
     for r_idx in out.index:
         rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_MAP[LOC_KEY_ELSEWHERE])
 
         if rider_loc == LOC_MAP[LOC_KEY_ELSEWHERE]:
-            num_skipped += 1
             continue
-
-        is_matched = False
 
         # Check if a driver prefers to pick up there.
         for d_idx, driver in drivers_df.iterrows():
@@ -41,8 +39,18 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
                 is_matched = True
                 break
 
-        if is_matched:
+    for r_idx in out.index:
+        # Check if already assigned to a driver with a preference
+        if type(out.at[r_idx, OUTPUT_DRIVER_NAME_HDR]) is str:
             continue
+
+        rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_MAP[LOC_KEY_ELSEWHERE])
+
+        if rider_loc == LOC_MAP[LOC_KEY_ELSEWHERE]:
+            num_skipped += 1
+            continue
+
+        is_matched = False
 
         # Check if a driver is already there.
         for d_idx, driver in drivers_df.iterrows():
@@ -55,9 +63,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             continue
 
         # Check if there is a driver up to DISTANCE_THRESHOLD away with at list VACANCY_THRESHOLD spots.
-        for dist in range(1, GLOBALS[DISTANCE_THRESHOLD] + 1):
+        for dist in range(1, ARGS['distance'] + 1):
             for d_idx, driver in drivers_df.iterrows():
-                if _is_nearby_dist(driver, rider_loc, dist) and driver[DRIVER_OPENINGS_HDR] >= GLOBALS[VACANCY_THRESHOLD]:
+                if _is_nearby_dist(driver, rider_loc, dist) and driver[DRIVER_OPENINGS_HDR] >= ARGS['vacancy']:
                     _add_rider(out, r_idx, drivers_df, d_idx)
                     is_matched = True
                     break
@@ -69,7 +77,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             continue
 
         # Check if there is a driver up to DISTANCE_THRESHOLD, ignoring VACANCY_THRESHOLD.
-        for dist in range(1, GLOBALS[DISTANCE_THRESHOLD] + 1):
+        for dist in range(1, ARGS['distance'] + 1):
             for d_idx, driver in drivers_df.iterrows():
                 if _is_nearby_dist(driver, rider_loc, dist):
                     _add_rider(out, r_idx, drivers_df, d_idx)
@@ -79,9 +87,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             if is_matched:
                 break
 
-        # Check if any driver if free that does not have a preferred location.
+        # Check if any driver is open that does not have a preferred location.
         for d_idx, driver in drivers_df.iterrows():
-            if _is_free(driver) and _has_no_preference(driver):
+            if _has_opening(driver):
                 _add_rider(out, r_idx, drivers_df, d_idx)
                 is_matched = True
                 break
@@ -111,7 +119,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
-    drivers = prep.prep_necessary_drivers(drivers_df, len(riders_df))
+    drivers = prep.fetch_necessary_drivers(drivers_df, len(riders_df))
     out = assign(drivers, riders_df)
     post.alert_skipped_riders(out)
     post.clean_output(out)
@@ -123,7 +131,12 @@ def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataF
     """Assigns Sunday rides.
     """
     (drivers, riders) = prep.filter_sunday(drivers_df, riders_df)
-    return organize(drivers, riders)
+    (drivers1, riders1, drivers2, riders2) = prep.split_sunday_services(drivers, riders)
+
+    assignments1 = organize(drivers1, riders1)
+    assignments2 = organize(drivers2, riders2)
+
+    return pd.concat([assignments1, assignments2])
 
 
 def assign_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
@@ -159,13 +172,7 @@ def _is_there(driver: pd.Series, rider_loc: int) -> bool:
 def _prefers_there(driver: pd.Series, rider_loc: int) -> bool:
     """Checks if driver is already picking up at the same college as the rider.
     """
-    return _has_opening(driver) and (driver[DRIVER_PREF_HDR] & rider_loc) != 0
-
-
-def _has_no_preference(driver: pd.Series) -> bool:
-    """Checks if driver has a preference.
-    """
-    return driver[DRIVER_PREF_HDR] == 0
+    return _has_opening(driver) and (driver[DRIVER_PREF_LOC_HDR] & rider_loc) != 0
 
 
 def _has_opening(driver: pd.Series) -> bool:
@@ -177,7 +184,7 @@ def _has_opening(driver: pd.Series) -> bool:
 def _is_free(driver: pd.Series) -> bool:
     """Checks if driver is completely free (no riders assigned, no preferences).
     """
-    return driver[DRIVER_ROUTE_HDR] == LOC_NONE and driver[DRIVER_PREF_HDR] == LOC_NONE
+    return driver[DRIVER_ROUTE_HDR] == LOC_NONE and driver[DRIVER_PREF_LOC_HDR] == LOC_NONE
 
 
 def _is_intersecting(driver: pd.Series, rider_loc: int) -> bool:

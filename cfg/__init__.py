@@ -3,10 +3,10 @@ import logging
 import os
 
 
-def load_map(day: str):
+def load_map():
     """Loads map.txt into a dictionary of bitmaps for the hardcoded locations.
     """
-    specific_map = f'{os.path.dirname(MAP_FILE)}/{day}_{os.path.basename(MAP_FILE)}'
+    specific_map = f'{os.path.dirname(MAP_FILE)}/{ARGS["day"]}_{os.path.basename(MAP_FILE)}'
     if os.path.isfile(specific_map):
         map_file = specific_map
     elif os.path.isfile(MAP_FILE):
@@ -69,9 +69,13 @@ def load_driver_prefs():
         with open(DRIVER_PREFS_FILE, 'r') as prefs:
             for pref in prefs:
                 pref = pref.split(',')
-                phone = pref[0].strip()
-                loc = pref[1].strip()
-                DRIVER_PREFS[phone] = LOC_MAP.get(loc, LOC_NONE)
+                phone = pref[1].strip()
+                loc = pref[2].strip()
+                service = pref[3].strip()
+                if loc != '':
+                    DRIVER_LOC_PREFS[phone] = LOC_MAP.get(loc, LOC_NONE)
+                if service != '':
+                    DRIVER_SERVICE_PREFS[phone] = service
                 cnt += 1
         logging.info(f'Loaded {cnt} driver preferences.')
     except:
@@ -94,8 +98,9 @@ def create_pickles():
         pd.DataFrame().to_pickle(os.path.join(DATA_PATH, OUTPUT_SHEET_KEY))
 
 
-def load(day: str):
-    load_map(day)
+def load(args: dict):
+    ARGS.update(args)
+    load_map()
     load_ignored_drivers()
     load_ignored_riders()
     load_driver_prefs()
