@@ -14,7 +14,8 @@ args = {
     'update': True,
     'rotate': False,
     'threshold': 2,
-    'log': 'INFO'
+    'log': 'INFO',
+    'main-service': 2
 }
 
 rides.main(args)

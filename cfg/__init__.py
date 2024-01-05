@@ -94,8 +94,10 @@ def create_pickles():
         pd.DataFrame().to_pickle(os.path.join(DATA_PATH, OUTPUT_SHEET_KEY))
 
 
-def load(day: str):
-    load_map(day)
+def load(args: dict):
+    GLOBALS[DISTANCE_THRESHOLD] = args['distance']
+    GLOBALS[VACANCY_THRESHOLD] = args['vacancy']
+    load_map(args['day'])
     load_ignored_drivers()
     load_ignored_riders()
     load_driver_prefs()
