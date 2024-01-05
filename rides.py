@@ -6,7 +6,7 @@ Usage:
 """
 
 import cfg
-from cfg.config import GLOBALS, DISTANCE_THRESHOLD, DISTANCE_MAX, VACANCY_THRESHOLD, VACANCY_MAX, SERVICE_ACCT_FILE
+from cfg.config import DISTANCE_MAX, VACANCY_MAX, SERVICE_ACCT_FILE
 import lib
 import os
 import argparse

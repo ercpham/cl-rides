@@ -3,10 +3,10 @@ import logging
 import os
 
 
-def load_map(day: str):
+def load_map():
     """Loads map.txt into a dictionary of bitmaps for the hardcoded locations.
     """
-    specific_map = f'{os.path.dirname(MAP_FILE)}/{day}_{os.path.basename(MAP_FILE)}'
+    specific_map = f'{os.path.dirname(MAP_FILE)}/{ARGS["day"]}_{os.path.basename(MAP_FILE)}'
     if os.path.isfile(specific_map):
         map_file = specific_map
     elif os.path.isfile(MAP_FILE):
@@ -95,9 +95,8 @@ def create_pickles():
 
 
 def load(args: dict):
-    GLOBALS[DISTANCE_THRESHOLD] = args['distance']
-    GLOBALS[VACANCY_THRESHOLD] = args['vacancy']
-    load_map(args['day'])
+    ARGS.update(args)
+    load_map()
     load_ignored_drivers()
     load_ignored_riders()
     load_driver_prefs()

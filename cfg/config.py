@@ -67,14 +67,9 @@ DRIVER_SHEET_KEY = 'drivers'
 OUTPUT_SHEET_KEY = 'out'
 
 ### The number of openings required for a car to freely pick up from a neighboring location
-DISTANCE_THRESHOLD = 'distance threshold'
 DISTANCE_MAX = 10
-VACANCY_THRESHOLD = 'vacancy threshold'
 VACANCY_MAX = 10
-GLOBALS = {                     # Use a dict in order to modify the global var later
-    DISTANCE_THRESHOLD: 2,
-    VACANCY_THRESHOLD: 2
-}
+ARGS = {}
 
 ### Route codes
 LOC_KEY_ELSEWHERE = 'ELSEWHERE'
