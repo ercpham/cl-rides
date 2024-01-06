@@ -2,9 +2,9 @@
 """
 
 from cfg.config import *
+import logging
 import pandas as pd
 from sqlite3 import Timestamp
-import logging
 
 
 def sync_to_last_assignments(drivers_df: pd.DataFrame, riders_df: pd.DataFrame, out: pd.DataFrame) -> pd.DataFrame:

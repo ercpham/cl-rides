@@ -2,8 +2,10 @@
 """
 
 import cfg
-from cfg.config import DISTANCE_MAX, VACANCY_MAX, SERVICE_ACCT_FILE, FIRST_SERVICE, SECOND_SERVICE
-import lib
+from cfg.config import *
+import lib.assignments as core
+import lib.preprocessing as prep
+import lib.rides_data as data
 import os
 import argparse
 import logging
@@ -27,12 +29,12 @@ def main(args: dict) -> None:
 
     # Fetch data from sheets
     if args['download']:
-        lib.update_pickles()
+        data.update_pickles()
 
     # Print input
-    lib.print_pickles()
+    data.print_pickles()
     
-    (drivers, riders) = lib.get_cached_input()
+    (drivers, riders) = data.get_cached_input()
 
     if len(riders.index) == 0:
         logging.error('No riders, aborting')
@@ -41,27 +43,27 @@ def main(args: dict) -> None:
         logging.error('No drivers, aborting')
         return
 
-    lib.clean_data(drivers, riders)
+    prep.clean_data(drivers, riders)
     
     # Do requested preprocessing
     if args['rotate']:
-        prev_out = lib.get_cached_output()
+        prev_out = data.get_cached_output()
         # Rotate drivers by last date driven
-        lib.rotate_drivers(drivers, lib.get_prev_driver_phones(prev_out))
-        lib.update_drivers_locally(drivers)
+        prep.rotate_drivers(drivers, prep.get_prev_driver_phones(prev_out))
+        data.update_drivers_locally(drivers)
         logging.info('Rotating drivers')
         logging.debug(drivers)
 
     # Execute the assignment algorithm
     if args['day'] == 'friday':
-        out = lib.assign_friday(drivers, riders)
+        out = core.assign_friday(drivers, riders)
     else:
-        out = lib.assign_sunday(drivers, riders)
+        out = core.assign_sunday(drivers, riders)
     
     # Print output
     logging.debug(f'Assignments output\n{out}')
 
-    lib.write_assignments(out, args['upload'])
+    data.write_assignments(out, args['upload'])
 
 
 if __name__ == '__main__':
