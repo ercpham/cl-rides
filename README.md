@@ -15,7 +15,7 @@ It will automatically assign riders to drivers every single week with the execut
 
 ```
 usage: rides.py [-h] --day {friday,sunday} [--download | --no-download] [--upload | --no-upload] [--rotate] [--distance {1,2,3,4,5,6,7,8,9}]
-                [--vacancy {1,2,3,4,5,6,7,8,9}] [--log {debug,info,warning,error,critical}]
+                [--vacancy {1,2,3,4,5,6,7,8,9}] [--log {debug,info,warning,error,critical}] [--main-service {1,2}] [--just-weekly]
 
 options:
   -h, --help            show this help message and exit
@@ -32,6 +32,8 @@ options:
                         set how many open spots a driver must have to pick up at a neighboring location before choosing a last resort driver
   --log {debug,info,warning,error,critical}
                         set a level of verbosity for logging
+  --main-service {1,2}  select the main Sunday service (i.e. select 1st service during weeks with ACE classes)
+  --just-weekly         use only the weekly rides for for these assignments
 ```
 
 ## Setup
@@ -43,13 +45,14 @@ To run the file, you need the API key in the form of a `service_account.json` fi
 You will need to place the `service_account.json` file in the `cfg` directory.
 
 ## Configurations
-In the `cfg` directory, you will find the file `map.txt`.
-Additionally, you can add `ignore_drivers.txt` and/or `ignore_riders.txt` to the `cfg` directory.
+In the `cfg` directory, you will need the file `map.txt` for the program to know how to route the drivers.
+You can add the additional files as well:
+- `friday_map.txt`
+- `ignore_drivers.txt`
+- `ignore_riders.txt`
+- `driver_preferences.txt`
 
-### ignore_drivers.txt and ignore_riders.txt
-Add the phone numbers of the people you want to exclude in the next run of the program, separated by `\n`, or **ENTER**.
-
-### map.txt
+### `map.txt`
 This file tells the program how different pickup locations are situated around each other.
 The following is an example file for the UCSD campus.
 It simulates a path that goes from the southwest side of campus to the east.
@@ -74,3 +77,14 @@ The syntax is as follows.
 - `,` : Locations separated by `,` are considered to be in the same area.
 - `\n` or **ENTER** : The number of **ENTER**s denotes how far apart two areas are.
 - `ELSEWHERE` : Represents locations not hardcoded into the script. Used for handling exact addresses and unknown locations.
+
+### `friday_map.txt`
+This follows the same idea as `map.txt`. If this file exists, it will be used instead for `--day friday` i.e. it can be used to only pick up off-campus people on fridays for CL.
+
+### `ignore_drivers.txt` and `ignore_riders.txt`
+Add the phone numbers of the people you want to exclude in the next run of the program, separated by `\n`, or **ENTER**.
+
+### `driver_preferences.csv`
+This file contains driver preferences for pickup location and which Sunday service they will go to.
+If not specified, the driver can pickup from any location, and they will pick up from the sunday service specified by `--main-service`.
+The default for `--main-service` is `2` (second service).
