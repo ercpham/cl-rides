@@ -39,8 +39,9 @@ def get_prev_driver_phones(prev_out: pd.DataFrame) -> set:
     """Returns all the phone numbers of the drivers from the previous grouping.
     """
     phone_nums = set()
-    for phone in prev_out[OUTPUT_DRIVER_PHONE_HDR]:
-        phone_nums.add(str(phone))
+    if len(prev_out.index) > 0:
+        for phone in prev_out[OUTPUT_DRIVER_PHONE_HDR]:
+            phone_nums.add(str(phone))
     return phone_nums
 
 
