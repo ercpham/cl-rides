@@ -45,14 +45,7 @@ def main(args: dict) -> None:
 
     prep.clean_data(drivers, riders)
     
-    # Do requested preprocessing
-    if args['rotate']:
-        prev_out = data.get_cached_output()
-        # Rotate drivers by last date driven
-        prep.rotate_drivers(drivers, prep.get_prev_driver_phones(prev_out))
-        data.update_drivers_locally(drivers)
-        logging.info('Rotating drivers')
-        logging.debug(drivers)
+    prep.update_driver_priorities(drivers)
 
     # Execute the assignment algorithm
     if args['day'] == 'friday':
