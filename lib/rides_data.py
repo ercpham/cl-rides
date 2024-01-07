@@ -5,11 +5,11 @@ from cfg.config import *
 import gspread
 import json
 import lib.preprocessing as prep
+import logging
 import os
 import pandas as pd
 import pickle
 from typing import Tuple
-import logging
 
 
 def update_pickles():
