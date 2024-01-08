@@ -38,9 +38,11 @@ def load_ignored_drivers():
     """
     try:
         cnt = 0
-        with open(IGNORE_DRIVERS_FILE, 'r') as nums:
-            for num in nums:
-                IGNORED_DRIVERS.append(num.strip())
+        with open(IGNORE_DRIVERS_FILE, 'r') as drivers:
+            for line in drivers:
+                line = line.split(',')
+                num = line[1].strip()
+                IGNORED_DRIVERS.append(num)
                 cnt += 1
         logging.info(f'Ignoring {cnt} drivers.')
     except:
@@ -52,9 +54,11 @@ def load_ignored_riders():
     """
     try:
         cnt = 0
-        with open(IGNORE_RIDERS_FILE, 'r') as nums:
-            for num in nums:
-                IGNORED_RIDERS.append(num.strip())
+        with open(IGNORE_RIDERS_FILE, 'r') as riders:
+            for line in riders:
+                line = line.split(',')
+                num = line[1].strip()
+                IGNORED_RIDERS.append(num)
                 cnt += 1
         logging.info(f'Ignoring {cnt} riders.')
     except:
