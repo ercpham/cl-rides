@@ -61,7 +61,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if is_matched:
             continue
 
-        # Check if there is a driver up to DISTANCE_THRESHOLD away with at list VACANCY_THRESHOLD spots.
+        # Check if there is a driver up to DISTANCE_THRESHOLD away with at least VACANCY_THRESHOLD spots.
         for dist in range(1, ARGS['distance'] + 1):
             for d_idx, driver in drivers_df.iterrows():
                 if _is_nearby_dist(driver, rider_loc, dist) and driver[DRIVER_OPENINGS_HDR] >= ARGS['vacancy']:
@@ -75,23 +75,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if is_matched:
             continue
 
-        # Check if there is a driver up to DISTANCE_THRESHOLD, ignoring VACANCY_THRESHOLD.
-        for dist in range(1, ARGS['distance'] + 1):
-            for d_idx, driver in drivers_df.iterrows():
-                if _is_nearby_dist(driver, rider_loc, dist):
-                    _add_rider(out, r_idx, drivers_df, d_idx)
-                    is_matched = True
-                    break
-
-            if is_matched:
-                break
-        
-        if is_matched:
-            continue
-
-        # Check if any driver is open that does not have a preferred location.
+        # Check if any driver is open.
         for d_idx, driver in drivers_df.iterrows():
-            if _has_opening(driver):
+            if _is_open(driver):
                 _add_rider(out, r_idx, drivers_df, d_idx)
                 is_matched = True
                 break
@@ -99,7 +85,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if is_matched:
             continue
 
-        # Find open driver with lightest route.
+        # Find any driver with space and with the lightest route.
         open_driver_idx = -1
         open_driver_found = False
         for d_idx, driver in drivers_df.iterrows():
@@ -178,6 +164,12 @@ def _prefers_there(driver: pd.Series, rider_loc: int) -> bool:
     """Checks if driver is already picking up at the same college as the rider.
     """
     return _has_opening(driver) and (driver[DRIVER_PREF_LOC_HDR] & rider_loc) != 0
+
+
+def _is_open(driver: pd.Series) -> bool:
+    """Checks if driver has space to take a rider.
+    """
+    return driver[DRIVER_ROUTE_HDR] == 0
 
 
 def _has_opening(driver: pd.Series) -> bool:

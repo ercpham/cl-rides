@@ -141,10 +141,9 @@ def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> 
     """Splits the lists into first and second service lists.
     @returns (drivers1, riders1, drivers2, riders2)
     """
-
     _add_service_vars(drivers_df, riders_df)
-    drivers1 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == FIRST_SERVICE]
-    drivers2 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == SECOND_SERVICE]
+    drivers1 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == FIRST_SERVICE].copy()
+    drivers2 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == SECOND_SERVICE].copy()
     riders1  = riders_df[riders_df[RIDER_SERVICE_HDR] == FIRST_SERVICE].copy()
     riders2  = riders_df[riders_df[RIDER_SERVICE_HDR] == SECOND_SERVICE].copy()
     return (drivers1, riders1, drivers2, riders2)
