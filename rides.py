@@ -43,7 +43,8 @@ def main(args: dict) -> None:
         logging.error('No drivers, aborting')
         return
 
-    prep.update_driver_priorities(drivers)
+    if ARGS['rotate']:
+        prep.rotate_drivers(drivers)
 
     prep.clean_data(drivers, riders)
     

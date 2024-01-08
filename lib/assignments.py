@@ -124,6 +124,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
 
 def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
+    prep.prioritize_drivers_with_preferences(drivers_df, riders_df)
     drivers = prep.fetch_necessary_drivers(drivers_df, len(riders_df))
     out = assign(drivers, riders_df)
     post.alert_skipped_riders(out)

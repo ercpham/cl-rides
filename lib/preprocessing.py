@@ -13,23 +13,44 @@ def update_driver_priorities(drivers_df: pd.DataFrame):
     """Order drivers by preference and (if rotating) time last driven.
     """
     if ARGS['rotate']:
-        _mark_unused_drivers(drivers_df)
-        drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
-        data.update_drivers_locally(drivers_df)
+        rotate_drivers(drivers_df)
     _mark_drivers_with_preferences(drivers_df)
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
 
 
-def _mark_drivers_with_preferences(drivers_df: pd.DataFrame):
-    """Set timestamp of drivers with preferences.
+def rotate_drivers(drivers_df: pd.DataFrame):
+    _mark_unused_drivers(drivers_df)
+    drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
+    data.update_drivers_locally(drivers_df)
+
+
+def prioritize_drivers_with_preferences(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):
+    _mark_drivers_with_preferences(drivers_df, riders_df)
+    drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
+    pass
+
+
+def _mark_drivers_with_preferences(drivers_df: pd.DataFrame, riders_df):
+    """Set timestamp of drivers with location preferences, if those preferences will be useful.
     """
-    # Adding 1 second causes driver's with preferences to be sorted to the top of the list so they will be used
+    # First, count how many riders are at each location
+    loc_freq = {}
+    for loc in riders_df[RIDER_LOCATION_HDR]:
+        loc = loc.strip().lower()
+        loc_bit = LOC_MAP.get(loc, LOC_NONE)
+        loc_freq[loc_bit] = loc_freq.get(loc_bit, 0) + 1
+
+    # Then, if a driver prefers that location, mark their timestamp to sort them to the top
     now = Timestamp.now() + pd.Timedelta(seconds=1)
 
     for idx in drivers_df.index:
         driver_phone = drivers_df.at[idx, DRIVER_PHONE_HDR]
         if driver_phone in DRIVER_LOC_PREFS:
-            drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
+            driver_loc_bit = DRIVER_LOC_PREFS[driver_phone]
+            # At least one rider must be left at this location in order to prioritize this driver
+            if loc_freq[driver_loc_bit] > 0:
+                loc_freq[driver_loc_bit] -= drivers_df.at[idx, DRIVER_CAPACITY_HDR]
+                drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
 
 
 def _get_prev_driver_phones(prev_out: pd.DataFrame) -> set:
