@@ -13,20 +13,44 @@ def update_driver_priorities(drivers_df: pd.DataFrame):
     """Order drivers by preference and (if rotating) time last driven.
     """
     if ARGS['rotate']:
-        _mark_unused_drivers(drivers_df)
+        rotate_drivers(drivers_df)
     _mark_drivers_with_preferences(drivers_df)
+    drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
+
+
+def rotate_drivers(drivers_df: pd.DataFrame):
+    _mark_unused_drivers(drivers_df)
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
     data.update_drivers_locally(drivers_df)
 
 
-def _mark_drivers_with_preferences(drivers_df: pd.DataFrame):
-    """Set timestamp of drivers with preferences.
+def prioritize_drivers_with_preferences(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):
+    _mark_drivers_with_preferences(drivers_df, riders_df)
+    drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
+    pass
+
+
+def _mark_drivers_with_preferences(drivers_df: pd.DataFrame, riders_df):
+    """Set timestamp of drivers with location preferences, if those preferences will be useful.
     """
+    # First, count how many riders are at each location
+    loc_freq = {}
+    for loc in riders_df[RIDER_LOCATION_HDR]:
+        loc = loc.strip().lower()
+        loc_bit = LOC_MAP.get(loc, LOC_NONE)
+        loc_freq[loc_bit] = loc_freq.get(loc_bit, 0) + 1
+
+    # Then, if a driver prefers that location, mark their timestamp to sort them to the top
     now = Timestamp.now() + pd.Timedelta(seconds=1)
+
     for idx in drivers_df.index:
         driver_phone = drivers_df.at[idx, DRIVER_PHONE_HDR]
         if driver_phone in DRIVER_LOC_PREFS:
-            drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
+            driver_loc_bit = DRIVER_LOC_PREFS[driver_phone]
+            # At least one rider must be left at this location in order to prioritize this driver
+            if loc_freq[driver_loc_bit] > 0:
+                loc_freq[driver_loc_bit] -= drivers_df.at[idx, DRIVER_CAPACITY_HDR]
+                drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
 
 
 def _get_prev_driver_phones(prev_out: pd.DataFrame) -> set:
@@ -86,7 +110,7 @@ def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.Data
     """
     riders = riders_df.copy()[riders_df[RIDER_FRIDAY_HDR] == RIDE_THERE_KEYWORD]
     num_riders = len(riders.index)
-    riders = riders[riders[RIDER_LOCATION_HDR].isin(LOC_MAP)]
+    riders = riders[riders[RIDER_LOCATION_HDR].str.strip().lower().isin(LOC_MAP)]
     num_off_campus = len(riders.index)
     num_on_campus = num_riders - num_off_campus
     drivers = drivers_df.copy()[drivers_df[DRIVER_AVAILABILITY_HDR].str.contains(DRIVER_FRIDAY_KEYWORD)]
@@ -117,10 +141,9 @@ def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> 
     """Splits the lists into first and second service lists.
     @returns (drivers1, riders1, drivers2, riders2)
     """
-
     _add_service_vars(drivers_df, riders_df)
-    drivers1 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == FIRST_SERVICE]
-    drivers2 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == SECOND_SERVICE]
+    drivers1 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == FIRST_SERVICE].copy()
+    drivers2 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == SECOND_SERVICE].copy()
     riders1  = riders_df[riders_df[RIDER_SERVICE_HDR] == FIRST_SERVICE].copy()
     riders2  = riders_df[riders_df[RIDER_SERVICE_HDR] == SECOND_SERVICE].copy()
     return (drivers1, riders1, drivers2, riders2)

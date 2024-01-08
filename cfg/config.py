@@ -76,12 +76,10 @@ VACANCY_MAX = 10
 ARGS = {}
 
 ### Route codes
-LOC_KEY_ELSEWHERE = 'ELSEWHERE'
 LOC_NONE = 0b0
 
 ### Configuration lists to be filled in later.
 LOC_MAP = {
-    LOC_KEY_ELSEWHERE: LOC_NONE
 }
 
 IGNORED_DRIVERS = []
