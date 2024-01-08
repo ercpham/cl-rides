@@ -84,9 +84,15 @@ Riders whose locations are not in the `map.txt` will be ignored.
 This follows the same idea as `map.txt`. If this file exists, it will be used instead for `--day friday` i.e. it can be used to only pick up off-campus people on fridays for CL.
 
 ### `ignore_drivers.txt` and `ignore_riders.txt`
-Add the phone numbers of the people you want to exclude in the next run of the program, separated by `\n`, or **ENTER**.
+Add the names and phone numbers of the people you want to exclude in the next run of the program, separated by `\n`, or **ENTER**.
+```
+<name>, <phone>
+```
 
 ### `driver_preferences.csv`
 This file contains driver preferences for pickup location and which Sunday service they will go to.
 If not specified, the driver can pickup from any location, and they will pick up from the sunday service specified by the `--main-service` argument.
 The default for `--main-service` is `2` (second service).
+```
+<name>, <phone>, [location], [service]
+```
