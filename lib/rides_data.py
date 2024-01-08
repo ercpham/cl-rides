@@ -55,8 +55,6 @@ def get_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
 
 def get_cached_input() -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Return a tuple of pandas DataFrames, ordered as (drivers, riders)
-    
-    If the rides data has not been read previously, the results may be outdated or an error might occur.
     """
     with open(os.path.join(DATA_PATH, PERMANENT_SHEET_KEY), 'rb') as pickle_file:
         permanent_riders = pd.DataFrame(pickle.load(pickle_file))

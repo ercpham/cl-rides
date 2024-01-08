@@ -22,7 +22,9 @@ def update_driver_priorities(drivers_df: pd.DataFrame):
 def _mark_drivers_with_preferences(drivers_df: pd.DataFrame):
     """Set timestamp of drivers with preferences.
     """
+    # Adding 1 second causes driver's with preferences to be sorted to the top of the list so they will be used
     now = Timestamp.now() + pd.Timedelta(seconds=1)
+
     for idx in drivers_df.index:
         driver_phone = drivers_df.at[idx, DRIVER_PHONE_HDR]
         if driver_phone in DRIVER_LOC_PREFS:
