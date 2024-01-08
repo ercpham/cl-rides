@@ -13,7 +13,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns rider to drivers in the returned dataframe.
     """
     prep.add_assignment_vars(drivers_df)
-    riders_df.sort_values(by=RIDER_LOCATION_HDR, inplace=True, key=lambda col: col.apply(lambda loc: LOC_MAP.get(loc, LOC_NONE)))
+    riders_df.sort_values(by=RIDER_LOCATION_HDR, inplace=True, key=lambda col: col.apply(lambda loc: LOC_MAP.get(loc.strip().lower(), LOC_NONE)))
     out = pd.concat([pd.DataFrame(columns=[OUTPUT_DRIVER_NAME_HDR, OUTPUT_DRIVER_PHONE_HDR, OUTPUT_DRIVER_CAPACITY_HDR]), riders_df[[RIDER_NAME_HDR, RIDER_PHONE_HDR, RIDER_LOCATION_HDR, RIDER_NOTES_HDR]]], axis='columns')
 
     logging.debug('Drivers')
@@ -26,7 +26,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
     # Assign drivers with preferences first
     for r_idx in out.index:
-        rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_NONE)
+        rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR].strip().lower(), LOC_NONE)
 
         if rider_loc == LOC_NONE:
             continue
@@ -43,7 +43,7 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
         if type(out.at[r_idx, OUTPUT_DRIVER_NAME_HDR]) is str:
             continue
 
-        rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_NONE)
+        rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR].strip().lower(), LOC_NONE)
 
         if rider_loc == LOC_NONE:
             num_skipped += 1
@@ -85,6 +85,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
 
             if is_matched:
                 break
+        
+        if is_matched:
+            continue
 
         # Check if any driver is open that does not have a preferred location.
         for d_idx, driver in drivers_df.iterrows():
@@ -108,8 +111,11 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             _add_rider(out, r_idx, drivers_df, open_driver_idx)
             is_matched = True
         
-        if not is_matched:
-            logging.warn(f'No driver available for {out.at[r_idx, RIDER_NAME_HDR]}')
+        if is_matched:
+            continue
+        
+        logging.warn(f'No driver available for {out.at[r_idx, RIDER_NAME_HDR]}')
+        num_skipped += 1
     
     if num_skipped > 0:
         logging.warn(f'Skipped {num_skipped} riders, location ignored')
@@ -150,7 +156,7 @@ def _add_rider(out: pd.DataFrame, r_idx: int, drivers_df: pd.DataFrame, d_idx: i
     out.at[r_idx, OUTPUT_DRIVER_NAME_HDR] = drivers_df.at[d_idx, DRIVER_NAME_HDR]
     out.at[r_idx, OUTPUT_DRIVER_PHONE_HDR] = drivers_df.at[d_idx, DRIVER_PHONE_HDR]
     out.at[r_idx, OUTPUT_DRIVER_CAPACITY_HDR] = drivers_df.at[d_idx, DRIVER_CAPACITY_HDR]
-    rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR], LOC_NONE)
+    rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR].strip().lower(), LOC_NONE)
     drivers_df.at[d_idx, DRIVER_OPENINGS_HDR] -= 1
     drivers_df.at[d_idx, DRIVER_ROUTE_HDR] |= rider_loc
 

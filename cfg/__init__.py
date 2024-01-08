@@ -22,7 +22,7 @@ def load_map():
             if (line.startswith('#')):
                 continue
             places = line.split(',')
-            places = [place.strip() for place in places]
+            places = [place.strip().lower() for place in places]
             for place in places:
                 if place not in LOC_MAP:
                     LOC_MAP[place] = LOC_NONE
@@ -74,7 +74,7 @@ def load_driver_prefs():
             for pref in prefs:
                 pref = pref.split(',')
                 phone = pref[1].strip()
-                loc = pref[2].strip()
+                loc = pref[2].strip().lower()
                 service = pref[3].strip()
                 if loc != '':
                     DRIVER_LOC_PREFS[phone] = LOC_MAP.get(loc, LOC_NONE)
