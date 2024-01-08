@@ -14,9 +14,10 @@ def update_driver_priorities(drivers_df: pd.DataFrame):
     """
     if ARGS['rotate']:
         _mark_unused_drivers(drivers_df)
+        drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
+        data.update_drivers_locally(drivers_df)
     _mark_drivers_with_preferences(drivers_df)
     drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
-    data.update_drivers_locally(drivers_df)
 
 
 def _mark_drivers_with_preferences(drivers_df: pd.DataFrame):

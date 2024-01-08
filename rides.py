@@ -43,10 +43,10 @@ def main(args: dict) -> None:
         logging.error('No drivers, aborting')
         return
 
-    prep.clean_data(drivers, riders)
-    
     prep.update_driver_priorities(drivers)
 
+    prep.clean_data(drivers, riders)
+    
     # Execute the assignment algorithm
     if args['day'] == 'friday':
         out = core.assign_friday(drivers, riders)
