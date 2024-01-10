@@ -25,17 +25,9 @@ def _format_output(out: pd.DataFrame):
             out.at[idx, OUTPUT_DRIVER_NAME_HDR] = '?'
             out.at[idx, OUTPUT_DRIVER_PHONE_HDR] = '?'
             out.at[idx, OUTPUT_DRIVER_CAPACITY_HDR] = ''
+            logging.debug(f'\t{out.at[idx, RIDER_NAME_HDR]} has no driver')
         elif idx > 0 and out.at[idx, OUTPUT_DRIVER_NAME_HDR] == out.at[idx - 1, OUTPUT_DRIVER_NAME_HDR]:
             # Remove redundant driver details.
             out.at[idx, OUTPUT_DRIVER_NAME_HDR] = ''
             out.at[idx, OUTPUT_DRIVER_PHONE_HDR] = ''
             out.at[idx, OUTPUT_DRIVER_CAPACITY_HDR] = ''
-
-
-def alert_skipped_riders(out: pd.DataFrame):
-    """Prints out all the riders who do not have a driver."""
-    logging.debug("Printing stranded riders.")
-    for _, rider in out.iterrows():
-        if rider[OUTPUT_DRIVER_NAME_HDR] is np.NaN:
-            logging.debug(f'\t{rider[RIDER_NAME_HDR]} has no driver')
-    logging.debug('')

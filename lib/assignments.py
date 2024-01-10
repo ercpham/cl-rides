@@ -113,7 +113,6 @@ def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     prep.prioritize_drivers_with_preferences(drivers_df, riders_df)
     drivers = prep.fetch_necessary_drivers(drivers_df, len(riders_df))
     out = assign(drivers, riders_df)
-    post.alert_skipped_riders(out)
     post.clean_output(out)
     return out
 
@@ -142,7 +141,7 @@ def _add_rider(out: pd.DataFrame, r_idx: int, drivers_df: pd.DataFrame, d_idx: i
     """
     out.at[r_idx, OUTPUT_DRIVER_NAME_HDR] = drivers_df.at[d_idx, DRIVER_NAME_HDR]
     out.at[r_idx, OUTPUT_DRIVER_PHONE_HDR] = drivers_df.at[d_idx, DRIVER_PHONE_HDR]
-    out.at[r_idx, OUTPUT_DRIVER_CAPACITY_HDR] = drivers_df.at[d_idx, DRIVER_CAPACITY_HDR]
+    out.at[r_idx, OUTPUT_DRIVER_CAPACITY_HDR] = drivers_df.at[d_idx, DRIVER_CAPACITY_HDR].astype(str)
     rider_loc = LOC_MAP.get(out.at[r_idx, RIDER_LOCATION_HDR].strip().lower(), LOC_NONE)
     drivers_df.at[d_idx, DRIVER_OPENINGS_HDR] -= 1
     drivers_df.at[d_idx, DRIVER_ROUTE_HDR] |= rider_loc

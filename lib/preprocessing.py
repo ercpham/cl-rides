@@ -110,7 +110,7 @@ def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.Data
     """
     riders = riders_df.copy()[riders_df[RIDER_FRIDAY_HDR] == RIDE_THERE_KEYWORD]
     num_riders = len(riders.index)
-    riders = riders[riders[RIDER_LOCATION_HDR].str.strip().lower().isin(LOC_MAP)]
+    riders = riders[riders[RIDER_LOCATION_HDR].str.strip().str.lower().isin(LOC_MAP)]
     num_off_campus = len(riders.index)
     num_on_campus = num_riders - num_off_campus
     drivers = drivers_df.copy()[drivers_df[DRIVER_AVAILABILITY_HDR].str.contains(DRIVER_FRIDAY_KEYWORD)]
