@@ -70,7 +70,8 @@ def _mark_unused_drivers(drivers_df: pd.DataFrame):
 
 def mark_late_friday_riders(riders_df: pd.DataFrame):
     for idx in riders_df.index:
-        if 'late' in riders_df.at[idx, RIDER_NOTES_HDR].lower():
+        note = riders_df.at[idx, RIDER_NOTES_HDR].lower()
+        if 'late' in note or '6' in note or '7' in note:
             riders_df.at[idx, RIDER_LOCATION_HDR] = CAMPUS
 
 
