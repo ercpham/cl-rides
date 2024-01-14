@@ -57,7 +57,7 @@ def main(args: dict) -> None:
     
     logging.info(f'Picking up {len(out.index)} riders')
     # Print output
-    post.clean_output(out)
+    out = post.clean_output(out)
     logging.debug(f'main --- Assignments output\n{out}')
 
     data.write_assignments(out, args['upload'])
