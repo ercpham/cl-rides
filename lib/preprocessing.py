@@ -2,20 +2,10 @@
 """
 
 from cfg.config import *
-import datetime
 import lib.rides_data as data
 import logging
 import pandas as pd
 from sqlite3 import Timestamp
-
-
-def update_driver_priorities(drivers_df: pd.DataFrame):
-    """Order drivers by preference and (if rotating) time last driven.
-    """
-    if ARGS['rotate']:
-        rotate_drivers(drivers_df)
-    _mark_drivers_with_preferences(drivers_df)
-    drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
 
 
 def rotate_drivers(drivers_df: pd.DataFrame):
@@ -76,6 +66,12 @@ def _mark_unused_drivers(drivers_df: pd.DataFrame):
             drivers_df.at[idx, DRIVER_TIMESTAMP_HDR] = now
 
     logging.info('Rotating drivers')
+
+
+def mark_late_friday_riders(riders_df: pd.DataFrame):
+    for idx in riders_df.index:
+        if 'late' in riders_df.at[idx, RIDER_NOTES_HDR].lower():
+            riders_df.at[idx, RIDER_LOCATION_HDR] = CAMPUS
 
 
 def clean_data(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):

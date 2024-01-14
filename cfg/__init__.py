@@ -76,7 +76,7 @@ def load_driver_prefs():
                 phone = pref[1].strip()
                 loc = pref[2].strip().lower()
                 service = pref[3].strip()
-                if loc != '':
+                if loc != '' and loc in LOC_MAP:
                     DRIVER_LOC_PREFS[phone] = LOC_MAP.get(loc, LOC_NONE)
                 if service != '':
                     DRIVER_SERVICE_PREFS[phone] = service
