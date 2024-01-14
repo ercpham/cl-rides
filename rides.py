@@ -4,6 +4,7 @@
 import cfg
 from cfg.config import *
 import lib.assignments as core
+import lib.postprocessing as post
 import lib.preprocessing as prep
 import lib.rides_data as data
 import os
@@ -54,7 +55,9 @@ def main(args: dict) -> None:
     else:
         out = core.assign_sunday(drivers, riders)
     
+    logging.info(f'Picking up {len(out.index)} riders')
     # Print output
+    post.clean_output(out)
     logging.debug(f'main --- Assignments output\n{out}')
 
     data.write_assignments(out, args['upload'])
