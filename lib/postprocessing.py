@@ -25,7 +25,7 @@ def _format_output(out: pd.DataFrame):
             out.at[idx, OUTPUT_DRIVER_NAME_HDR] = '?'
             out.at[idx, OUTPUT_DRIVER_PHONE_HDR] = '?'
             out.at[idx, OUTPUT_DRIVER_CAPACITY_HDR] = ''
-            logging.debug(f'\t{out.at[idx, RIDER_NAME_HDR]} has no driver')
+            logging.debug(f'_format_output --- \t{out.at[idx, RIDER_NAME_HDR]} has no driver')
         elif idx > 0 and out.at[idx, OUTPUT_DRIVER_NAME_HDR] == out.at[idx - 1, OUTPUT_DRIVER_NAME_HDR]:
             # Remove redundant driver details.
             out.at[idx, OUTPUT_DRIVER_NAME_HDR] = ''

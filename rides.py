@@ -55,7 +55,7 @@ def main(args: dict) -> None:
         out = core.assign_sunday(drivers, riders)
     
     # Print output
-    logging.debug(f'Assignments output\n{out}')
+    logging.debug(f'main --- Assignments output\n{out}')
 
     data.write_assignments(out, args['upload'])
 

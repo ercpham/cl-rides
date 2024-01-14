@@ -41,7 +41,7 @@ def print_pickles():
         with open(os.path.join(DATA_PATH, key), 'rb') as pickle_file:
             records = pickle.load(pickle_file)
             df = pd.DataFrame(records)
-            logging.debug(f'Printing {key}\n{df}')
+            logging.debug(f'print_pickles --- Printing {key}\n{df}')
 
 
 def get_data() -> Tuple[pd.DataFrame, pd.DataFrame]:

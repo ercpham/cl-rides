@@ -126,10 +126,10 @@ def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.Dat
     """Reduces the list of drivers to the minimum necessary to offer rides.
     """
     driver_cnt = _find_driver_cnt(drivers_df, cnt_riders)
-    logging.debug(f"FETCH_NECESSARY_DRIVERS --- Drivers available:\n{drivers_df}")
+    logging.debug(f"fetch_necessary_drivers --- Drivers available:\n{drivers_df}")
     drivers = drivers_df.copy()[:driver_cnt]
     drivers.sort_values(by=DRIVER_CAPACITY_HDR, ascending=False, inplace=True)
-    logging.debug(f"FETCH_NECESSARY_DRIVERS --- Drivers used:\n{drivers}")
+    logging.debug(f"fetch_necessary_drivers --- Drivers used:\n{drivers}")
     return drivers
 
 
