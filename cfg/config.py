@@ -70,6 +70,8 @@ WEEKLY_SHEET_KEY = 'weekly'
 DRIVER_SHEET_KEY = 'drivers'
 OUTPUT_SHEET_KEY = 'out'
 
+CAMPUS = 'Campus'
+
 ### The number of openings required for a car to freely pick up from a neighboring location
 DISTANCE_MAX = 10
 VACANCY_MAX = 10

@@ -2,20 +2,10 @@
 """
 
 from cfg.config import *
-import datetime
 import lib.rides_data as data
 import logging
 import pandas as pd
 from sqlite3 import Timestamp
-
-
-def update_driver_priorities(drivers_df: pd.DataFrame):
-    """Order drivers by preference and (if rotating) time last driven.
-    """
-    if ARGS['rotate']:
-        rotate_drivers(drivers_df)
-    _mark_drivers_with_preferences(drivers_df)
-    drivers_df.sort_values(by=DRIVER_TIMESTAMP_HDR, inplace=True, ascending=False)
 
 
 def rotate_drivers(drivers_df: pd.DataFrame):
@@ -78,6 +68,13 @@ def _mark_unused_drivers(drivers_df: pd.DataFrame):
     logging.info('Rotating drivers')
 
 
+def mark_late_friday_riders(riders_df: pd.DataFrame):
+    for idx in riders_df.index:
+        note = riders_df.at[idx, RIDER_NOTES_HDR].lower()
+        if 'late' in note or '6' in note or '7' in note:
+            riders_df.at[idx, RIDER_LOCATION_HDR] = CAMPUS
+
+
 def clean_data(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):
     """Filters out the unneeded columns and and validates the data before assigning.
     """
@@ -129,11 +126,12 @@ def filter_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.Data
 def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.DataFrame:
     """Reduces the list of drivers to the minimum necessary to offer rides.
     """
+    logging.debug(f"fetch_necessary_drivers --- Drivers available:\n{drivers_df}")
     driver_cnt = _find_driver_cnt(drivers_df, cnt_riders)
-    logging.debug(f"FETCH_NECESSARY_DRIVERS --- Drivers available:\n{drivers_df}")
+    logging.info(f"Using {driver_cnt} drivers")
     drivers = drivers_df.copy()[:driver_cnt]
     drivers.sort_values(by=DRIVER_CAPACITY_HDR, ascending=False, inplace=True)
-    logging.debug(f"FETCH_NECESSARY_DRIVERS --- Drivers used:\n{drivers}")
+    logging.debug(f"fetch_necessary_drivers --- Drivers used:\n{drivers}")
     return drivers
 
 

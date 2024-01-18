@@ -3,7 +3,6 @@ Includes group optimization for common pickup locations.
 """
 
 from cfg.config import *
-import lib.postprocessing as post
 import lib.preprocessing as prep
 import logging
 import pandas as pd
@@ -16,11 +15,11 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     riders_df.sort_values(by=RIDER_LOCATION_HDR, inplace=True, key=lambda col: col.apply(lambda loc: LOC_MAP.get(loc.strip().lower(), LOC_NONE)))
     out = pd.concat([pd.DataFrame(columns=[OUTPUT_DRIVER_NAME_HDR, OUTPUT_DRIVER_PHONE_HDR, OUTPUT_DRIVER_CAPACITY_HDR]), riders_df[[RIDER_NAME_HDR, RIDER_PHONE_HDR, RIDER_LOCATION_HDR, RIDER_NOTES_HDR]]], axis='columns')
 
-    logging.debug('Drivers')
+    logging.debug('assign --- Drivers')
     logging.debug(drivers_df)
-    logging.debug('Riders')
+    logging.debug('assign --- Riders')
     logging.debug(riders_df)
-    logging.debug('Assigning started')
+    logging.debug('assign --- Assigning started')
 
     num_skipped = 0
 
@@ -113,7 +112,6 @@ def organize(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     prep.prioritize_drivers_with_preferences(drivers_df, riders_df)
     drivers = prep.fetch_necessary_drivers(drivers_df, len(riders_df))
     out = assign(drivers, riders_df)
-    post.clean_output(out)
     return out
 
 
@@ -132,6 +130,7 @@ def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataF
 def assign_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns Friday rides.
     """
+    prep.mark_late_friday_riders(riders_df)
     (drivers, riders) = prep.filter_friday(drivers_df, riders_df)
     return organize(drivers, riders)
 
