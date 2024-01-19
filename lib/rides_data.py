@@ -6,6 +6,7 @@ import gspread
 import json
 import lib.preprocessing as prep
 import logging
+import numpy as np
 import os
 import pandas as pd
 import pickle
@@ -72,6 +73,7 @@ def get_cached_input() -> Tuple[pd.DataFrame, pd.DataFrame]:
     if len(weekly_riders.index) > 0:
         weekly_riders = weekly_riders[[WEEKLY_RIDER_TIMESTAMP_HDR, WEEKLY_RIDER_NAME_HDR, WEEKLY_RIDER_PHONE_HDR, WEEKLY_RIDER_LOCATION_HDR, WEEKLY_RIDER_FRIDAY_HDR, WEEKLY_RIDER_SUNDAY_HDR, WEEKLY_RIDER_NOTES_HDR]]
         weekly_riders.rename(columns={WEEKLY_RIDER_TIMESTAMP_HDR: RIDER_TIMESTAMP_HDR, WEEKLY_RIDER_NAME_HDR: RIDER_NAME_HDR, WEEKLY_RIDER_PHONE_HDR: RIDER_PHONE_HDR, WEEKLY_RIDER_LOCATION_HDR: RIDER_LOCATION_HDR, WEEKLY_RIDER_FRIDAY_HDR: RIDER_FRIDAY_HDR, WEEKLY_RIDER_SUNDAY_HDR: RIDER_SUNDAY_HDR, WEEKLY_RIDER_NOTES_HDR: RIDER_NOTES_HDR}, inplace=True)
+        weekly_riders = weekly_riders[weekly_riders[RIDER_PHONE_HDR] != np.nan] # remove lines that have been deleted
     if len(permanent_riders.index) > 0:
         permanent_riders.rename(columns={PERMANENT_RIDER_TIMESTAMP_HDR: RIDER_TIMESTAMP_HDR, PERMANENT_RIDER_NAME_HDR: RIDER_NAME_HDR, PERMANENT_RIDER_PHONE_HDR: RIDER_PHONE_HDR, PERMANENT_RIDER_LOCATION_HDR: RIDER_LOCATION_HDR, PERMANENT_RIDER_FRIDAY_HDR: RIDER_FRIDAY_HDR, PERMANENT_RIDER_SUNDAY_HDR: RIDER_SUNDAY_HDR, PERMANENT_RIDER_NOTES_HDR: RIDER_NOTES_HDR}, inplace=True)
     if ARGS['just_weekly']:
