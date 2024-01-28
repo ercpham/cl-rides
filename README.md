@@ -72,8 +72,7 @@ Warren, Pepper Canyon Apts
 Rita Atkinson
 ```
 The syntax is as follows.
-- `<loc>` : Every location must match how it is used in the Google Forms
-  - `Revelle` is accepted, `revelle` is not.
+- `<loc>` : A location in the Google Forms. This is case insensitive.
 - `#` : Lines starting with `#` are ignored as comments.
 - `,` : Locations separated by `,` are considered to be in the same area.
 - `\n` or **ENTER** : The number of **ENTER**s denotes how far apart two areas are.
