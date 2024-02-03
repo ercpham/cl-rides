@@ -6,14 +6,20 @@ import os
 def load_map():
     """Loads map.txt into a dictionary of bitmaps for the hardcoded locations.
     """
-    specific_map = f'{os.path.dirname(MAP_FILE)}/{ARGS["day"]}_{os.path.basename(MAP_FILE)}'
-    if os.path.isfile(specific_map):
-        map_file = specific_map
-    elif os.path.isfile(MAP_FILE):
+    if os.path.isfile(MAP_FILE):
         map_file = MAP_FILE
     else:
-        logging.info(f'{os.path.basename(specific_map)} and {os.path.basename(MAP_FILE)} not found. Location optimizations are ignored.')
+        logging.warning(f'{os.path.basename(MAP_FILE)} not found. Location optimizations are ignored.')
         return
+    
+    if ARGS[PARAM_DAY] == ARG_FRIDAY:
+        if os.path.isfile(CAMPUS_FILE):
+            with open(CAMPUS_FILE) as campus:
+                for place in campus:
+                    place = place.strip().lower()
+                    CAMPUS_LOCS.add(place)
+        else:
+            logging.warning(f'{os.path.basename(CAMPUS_FILE)} not found. Friday campus riders are not filtered.')
 
     cnt = 0
     with open(map_file, 'r') as map:
@@ -24,6 +30,8 @@ def load_map():
             places = line.split(',')
             places = [place.strip().lower() for place in places]
             for place in places:
+                if ARGS[PARAM_DAY] == ARG_FRIDAY and place in CAMPUS_LOCS:
+                    place = CAMPUS.strip().lower()
                 if place not in LOC_MAP:
                     LOC_MAP[place] = LOC_NONE
                 LOC_MAP[place] |= loc

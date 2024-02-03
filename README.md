@@ -48,7 +48,7 @@ You will need to place the `service_account.json` file in the `cfg` directory.
 ## Configurations
 In the `cfg` directory, you will need the file `map.txt` for the program to know how to route the drivers.
 You can add the additional configuration files as well:
-- `friday_map.txt`
+- `campus.txt`
 - `ignore_drivers.txt`
 - `ignore_riders.txt`
 - `driver_preferences.txt`
@@ -79,8 +79,8 @@ The syntax is as follows.
 
 Riders whose locations are not in the `map.txt` will be ignored.
 
-### `friday_map.txt`
-This follows the same idea as `map.txt`. If this file exists, it will be used instead for `--day friday` i.e. it can be used to only pick up off-campus people on fridays for CL.
+### `campus.txt`
+This file specifies which locations in `map.txt` are on campus, and therefore those locations will be ignored on Friday unless a rider says they will be late in the notes. For this file, just specify one location per line.
 
 ### `ignore_drivers.txt` and `ignore_riders.txt`
 Add the names and phone numbers of the people you want to exclude in the next run of the program, separated by `\n`, or **ENTER**.
