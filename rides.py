@@ -68,7 +68,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument(f'--{PARAM_DAY}', required=True, choices=[ARG_FRIDAY, ARG_SUNDAY],
                         help=f'choose either \'{ARG_FRIDAY}\' for CL, or \'{ARG_SUNDAY}\' for church')
-    parser.add_argument(f'--{PARAM_SERVICE}', default=ARG_SECOND_SERVICE, choices=[ARG_FIRST_SERVICE, ARG_SECOND_SERVICE],
+    parser.add_argument(f'--{OPT_SERVICE}', default=ARG_SECOND_SERVICE, choices=[ARG_FIRST_SERVICE, ARG_SECOND_SERVICE],
                         help='select the main Sunday service (i.e. select 1st service during weeks with ACE classes)')
     parser.add_argument(f'--{PARAM_ROTATE}', action='store_true',
                         help='drivers are rotated based on date last driven')

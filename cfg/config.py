@@ -78,12 +78,13 @@ PARAM_DAY = 'day'
 ARG_FRIDAY = 'friday'
 ARG_SUNDAY = 'sunday'
 
-PARAM_SERVICE = 'main-service'
+OPT_SERVICE = 'main-service'    # argparse converts - to _
+PARAM_SERVICE = 'main_service'
 ARG_FIRST_SERVICE = '1'
 ARG_SECOND_SERVICE = '2'
 
 PARAM_ROTATE = 'rotate'
-OPT_JUST_WEEKLY = 'just-weekly'
+OPT_JUST_WEEKLY = 'just-weekly' # argparse converts - to _
 PARAM_JUST_WEEKLY = 'just_weekly'
 PARAM_UPLOAD = 'upload'
 PARAM_DOWNLOAD = 'download'
@@ -102,6 +103,7 @@ LOC_NONE = 0b0
 ### Configuration lists to be filled in later.
 LOC_MAP = {
 }
+CAMPUS_LOCS = set()
 
 IGNORED_DRIVERS = []
 IGNORED_RIDERS = []
