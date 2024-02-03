@@ -61,9 +61,9 @@ def assign(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
             continue
 
         # Check if there is a driver up to DISTANCE_THRESHOLD away with at least VACANCY_THRESHOLD spots.
-        for dist in range(1, ARGS['distance'] + 1):
+        for dist in range(1, ARGS[PARAM_DISTANCE] + 1):
             for d_idx, driver in drivers_df.iterrows():
-                if _is_nearby_dist(driver, rider_loc, dist) and driver[DRIVER_OPENINGS_HDR] >= ARGS['vacancy']:
+                if _is_nearby_dist(driver, rider_loc, dist) and driver[DRIVER_OPENINGS_HDR] >= ARGS[PARAM_VACANCY]:
                     _add_rider(out, r_idx, drivers_df, d_idx)
                     is_matched = True
                     break

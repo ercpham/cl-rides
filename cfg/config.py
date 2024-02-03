@@ -58,6 +58,7 @@ import os
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pickle')
 CFG_PATH = os.path.dirname(os.path.realpath(__file__))
 MAP_FILE = os.path.join(CFG_PATH, 'map.txt')
+CAMPUS_FILE = os.path.join(CFG_PATH, 'campus.txt')
 IGNORE_DRIVERS_FILE = os.path.join(CFG_PATH, 'ignore_drivers.txt')
 IGNORE_RIDERS_FILE = os.path.join(CFG_PATH, 'ignore_riders.txt')
 DRIVER_PREFS_FILE = os.path.join(CFG_PATH, 'driver_preferences.csv')
@@ -72,10 +73,28 @@ OUTPUT_SHEET_KEY = 'out'
 
 CAMPUS = 'Campus'
 
-### The number of openings required for a car to freely pick up from a neighboring location
-DISTANCE_MAX = 10
-VACANCY_MAX = 10
 ARGS = {}
+PARAM_DAY = 'day'
+ARG_FRIDAY = 'friday'
+ARG_SUNDAY = 'sunday'
+
+PARAM_SERVICE = 'main-service'
+ARG_FIRST_SERVICE = '1'
+ARG_SECOND_SERVICE = '2'
+
+PARAM_ROTATE = 'rotate'
+OPT_JUST_WEEKLY = 'just-weekly'
+PARAM_JUST_WEEKLY = 'just_weekly'
+PARAM_UPLOAD = 'upload'
+PARAM_DOWNLOAD = 'download'
+
+PARAM_DISTANCE = 'distance'
+ARG_DISTANCE = 10
+### The number of openings required for a car to freely pick up from a neighboring location
+PARAM_VACANCY = 'vacancy'
+ARG_VACANCY = 10
+
+PARAM_LOG = 'log'
 
 ### Route codes
 LOC_NONE = 0b0
@@ -88,5 +107,3 @@ IGNORED_DRIVERS = []
 IGNORED_RIDERS = []
 DRIVER_LOC_PREFS = {}
 DRIVER_SERVICE_PREFS = {}
-FIRST_SERVICE = '1'
-SECOND_SERVICE = '2'

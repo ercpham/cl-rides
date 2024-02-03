@@ -140,10 +140,10 @@ def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> 
     @returns (drivers1, riders1, drivers2, riders2)
     """
     _add_service_vars(drivers_df, riders_df)
-    drivers1 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == FIRST_SERVICE].copy()
-    drivers2 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == SECOND_SERVICE].copy()
-    riders1  = riders_df[riders_df[RIDER_SERVICE_HDR] == FIRST_SERVICE].copy()
-    riders2  = riders_df[riders_df[RIDER_SERVICE_HDR] == SECOND_SERVICE].copy()
+    drivers1 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == ARG_FIRST_SERVICE].copy()
+    drivers2 = drivers_df[drivers_df[DRIVER_SERVICE_HDR] == ARG_SECOND_SERVICE].copy()
+    riders1  = riders_df[riders_df[RIDER_SERVICE_HDR] == ARG_FIRST_SERVICE].copy()
+    riders2  = riders_df[riders_df[RIDER_SERVICE_HDR] == ARG_SECOND_SERVICE].copy()
     return (drivers1, riders1, drivers2, riders2)
 
 
@@ -164,7 +164,7 @@ def _add_service_vars(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):
     """
     drivers_df[DRIVER_SERVICE_HDR] = 0
     for idx in drivers_df.index:
-        drivers_df.at[idx, DRIVER_SERVICE_HDR] = DRIVER_SERVICE_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], ARGS['main_service'])
+        drivers_df.at[idx, DRIVER_SERVICE_HDR] = DRIVER_SERVICE_PREFS.get(drivers_df.at[idx, DRIVER_PHONE_HDR], ARGS[PARAM_SERVICE])
 
     riders_df[RIDER_SERVICE_HDR] = 0
     for idx in riders_df.index:
@@ -173,11 +173,11 @@ def _add_service_vars(drivers_df: pd.DataFrame, riders_df: pd.DataFrame):
 
 def _parse_service(s: str) -> str:
     if _requested_first_service(s):
-        return FIRST_SERVICE
+        return ARG_FIRST_SERVICE
     elif _requested_second_service(s):
-        return SECOND_SERVICE
+        return ARG_SECOND_SERVICE
     else:
-        return ARGS['main_service']
+        return ARGS[PARAM_SERVICE]
 
 
 def _requested_first_service(s: str) -> bool:
