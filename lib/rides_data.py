@@ -101,8 +101,8 @@ def write_assignments(assignments: pd.DataFrame, update: bool):
         ws = gc.open_by_key(gid_data[OUTPUT_SHEET_KEY]).get_worksheet(0)
 
         ws.resize(rows=len(assignments))
-        ws.update([assignments.columns.values.tolist()] + assignments.values.tolist())
         logging.info('Uploading assignments')
+        ws.update([assignments.columns.values.tolist()] + assignments.values.tolist())
 
 
 def get_cached_output() -> pd.DataFrame:
