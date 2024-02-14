@@ -211,10 +211,17 @@ def _mark_late_friday_riders(riders_df: pd.DataFrame):
             riders_df.at[idx, RIDER_LOCATION_HDR] = CAMPUS
 
 
-def split_friday_late_riders(riders_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    riders1 = riders_df[~riders_df[RIDER_NOTES_HDR].str.lower().str.contains('late')]
-    riders2 = riders_df[riders_df[RIDER_NOTES_HDR].str.lower().str.contains('late')]
-    return (riders1, riders2)
+def split_friday_late_cars(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Separates rides for late riders. Also designates drivers for the late riders.
+    """
+    riders1 = riders_df[~riders_df[RIDER_NOTES_HDR].str.lower().str.contains('late')].copy()
+    riders2 = riders_df[riders_df[RIDER_NOTES_HDR].str.lower().str.contains('late')].copy()
+
+    late_driver_cnt = _find_driver_cnt(drivers_df, len(riders2))
+    drivers1 = drivers_df[late_driver_cnt:].copy()
+    drivers2 = drivers_df[:late_driver_cnt].copy()
+
+    return (drivers1, riders1, drivers2, riders2)
 
 
 
