@@ -102,7 +102,7 @@ def standardize_weekly_responses(riders_df: pd.DataFrame):
         riders_df.at[idx, WEEKLY_RIDER_SUNDAY_HDR] = RIDE_THERE_KEYWORD if WEEKLY_RIDE_THERE_KEYWORD in response.lower() else ''
 
 
-def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
+def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Filters riders that will attend Friday College Life AND are from campus.
     """
     riders = riders_df.copy()[riders_df[RIDER_FRIDAY_HDR] == RIDE_THERE_KEYWORD]
@@ -114,7 +114,7 @@ def filter_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.Data
     return (drivers, riders)
 
 
-def filter_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame):
+def filter_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Filters riders that will attend Sunday service.
     """
     riders = riders_df.copy()[riders_df[RIDER_SUNDAY_HDR] == RIDE_THERE_KEYWORD]
@@ -134,7 +134,7 @@ def fetch_necessary_drivers(drivers_df: pd.DataFrame, cnt_riders: int) -> pd.Dat
     return drivers
 
 
-def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> (pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame):
+def split_sunday_services(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Splits the lists into first and second service lists.
     @returns (drivers1, riders1, drivers2, riders2)
     """
