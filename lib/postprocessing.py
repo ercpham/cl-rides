@@ -14,7 +14,7 @@ def clean_output(out: pd.DataFrame) -> pd.DataFrame:
 
 
 def _format_output(out: pd.DataFrame) -> pd.DataFrame:
-    """Organizes the output to order by driver then driver. Removes redundant driver details.
+    """Organizes the output to order by driver. Removes redundant driver details. Also spaces out driver groups.
     """
     if len(out) == 0:
         return

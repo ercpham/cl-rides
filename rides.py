@@ -86,6 +86,5 @@ if __name__ == '__main__':
                         help='set a level of verbosity for logging')
     
     args = vars(parser.parse_args())
-    print(args)
 
     main(args);
