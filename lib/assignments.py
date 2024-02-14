@@ -130,7 +130,6 @@ def assign_sunday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataF
 def assign_friday(drivers_df: pd.DataFrame, riders_df: pd.DataFrame) -> pd.DataFrame:
     """Assigns Friday rides.
     """
-    prep.mark_late_friday_riders(riders_df)
     (drivers, riders) = prep.filter_friday(drivers_df, riders_df)
     return organize(drivers, riders)
 
