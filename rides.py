@@ -1,116 +1,90 @@
 """ Main file for automatic driver assignments.
-
-Usage:
-    python rides.py
 """
 
-from cfg.config import GLOBALS, GROUPING_THRESHOLD, SERVICE_ACCT_FILE
-import lib
+import cfg
+from cfg.config import *
+import lib.assignments as core
+import lib.postprocessing as post
+import lib.preprocessing as prep
+import lib.rides_data as data
 import os
-import sys
+import argparse
+import logging
 
 
-def show_usage() -> None:
-    """ Show usage of rides.py
-    """
-    print('USAGE:')
-    print('python rides.py <--friday | --sunday> [[FLAG] ...]')
-    print()
-    print('FLAG')
-    print('    --help                Shows usage')
-    print('    --debug               Prints out debug statements while running')
-    print('    --no-fetch            Prevents new sheet data from being fetched')
-    print('    --no-update           Prevents the output sheet from being updated')
-    print('    --rotate              Previous assignments are cleared and drivers are rotated based on date last driven')
-    print('    --edit                Previous assignments are retained and new assignments are appended')
-    print('    --friday              Assigns rides for Friday College Life')
-    print('    --sunday              Assigns rides for Sunday service')
-    print('    --threshold=<num>     Sets how many open spots a driver must have to spontaneously pick up at a neighboring location. The default is 2.')
-    print()
-
-
-def main(fetch: bool, update: bool, rotate: bool, edit: bool, friday: bool, debug: bool) -> None:
+def main(args: dict) -> None:
     """ Assign riders to drivers, updating the sheet if specified
     """
+
+    logging.basicConfig(format='%(levelname)s:%(message)s', level=getattr(logging, args[PARAM_LOG].upper()))
+
+    # Continue only if service_account.json exists for accessing the Google Sheets data
+    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (args[PARAM_DOWNLOAD] or args[PARAM_UPLOAD]) 
+    if not api_reqs_fulfilled:
+        logging.critical(f'${SERVICE_ACCT_FILE} not found.')
+        logging.critical('Make sure service_account.json is in the cfg directory.')
+        logging.critical("Contact Timothy Wu if you don't have it.")
+        return
+
+    cfg.load(args)
+
     # Fetch data from sheets
-    if fetch:
-        lib.update_pickles()
+    if args[PARAM_DOWNLOAD]:
+        data.update_pickles()
 
     # Print input
-    if debug:
-        lib.print_pickles()
+    data.print_pickles()
     
-    (drivers, riders) = lib.get_cached_input()
-    lib.clean_data(drivers, riders)
+    (drivers, riders) = data.get_cached_input()
 
-    # Do requested preprocessing
-    if rotate or edit:
-        prev_out = lib.get_cached_output()
-        if rotate:
-            # Rotate drivers by last date driven
-            lib.rotate_drivers(drivers, lib.get_prev_driver_phones(prev_out))
-            lib.update_drivers_locally(drivers)
-        elif edit:
-            #TODO: Load previous output into assignments
-            pass
+    if len(riders.index) == 0:
+        logging.error('No riders, aborting')
+        return
+    if len(drivers.index) == 0:
+        logging.error('No drivers, aborting')
+        return
 
+    if ARGS[PARAM_ROTATE]:
+        prep.rotate_drivers(drivers)
+
+    prep.clean_data(drivers, riders)
+    
     # Execute the assignment algorithm
-    if friday:
-        out = lib.assign_friday(drivers, riders, debug)
+    if args[PARAM_DAY] == ARG_FRIDAY:
+        out = core.assign_friday(drivers, riders)
     else:
-        out = lib.assign_sunday(drivers, riders, debug)
+        out = core.assign_sunday(drivers, riders)
     
+    logging.info(f'Picking up {len(out.index)} riders')
     # Print output
-    if debug:
-        print('Assignments output')
-        print(out)
+    out = post.clean_output(out)
+    logging.debug(f'main --- Assignments output\n{out}')
 
-    lib.write_assignments(out, update)
+    data.write_assignments(out, args[PARAM_UPLOAD])
 
 
 if __name__ == '__main__':
-    execute = True
-    update = True
-    fetch = True
-    debug = False
-    rotate = False
-    edit = False
-    friday = False
-    sunday = False
 
-    for argv in sys.argv[1:]:
-        if argv == '--help':
-            execute = False
-        elif argv == '--debug':
-            debug = True
-        elif argv == '--no-fetch':
-            fetch = False
-        elif argv == '--no-update':
-            update = False
-        elif argv == '--rotate':
-            rotate = True
-        elif argv == '--edit':
-            edit = True
-        elif argv == '--friday':
-            friday = True
-        elif argv == '--sunday':
-            sunday = True
-        elif argv.find('--threshold') != -1:
-            try:
-                GLOBALS[GROUPING_THRESHOLD] = int(argv.split('=').pop())
-            except:
-                execute = False
+    parser = argparse.ArgumentParser()
+    parser.add_argument(f'--{PARAM_DAY}', required=True, choices=[ARG_FRIDAY, ARG_SUNDAY],
+                        help=f'choose either \'{ARG_FRIDAY}\' for CL, or \'{ARG_SUNDAY}\' for church')
+    parser.add_argument(f'--{OPT_SERVICE}', default=ARG_SECOND_SERVICE, choices=[ARG_FIRST_SERVICE, ARG_SECOND_SERVICE],
+                        help='select the main Sunday service (i.e. select 1st service during weeks with ACE classes)')
+    parser.add_argument(f'--{PARAM_ROTATE}', action='store_true',
+                        help='drivers are rotated based on date last driven')
+    parser.add_argument(f'--{OPT_JUST_WEEKLY}', action='store_true',
+                        help='use only the weekly rides for for these assignments (i.e. holidays)')
+    parser.add_argument(f'--{PARAM_DOWNLOAD}', action=argparse.BooleanOptionalAction, default=True,
+                        help='choose whether to download Google Sheets data')
+    parser.add_argument(f'--{PARAM_UPLOAD}', action=argparse.BooleanOptionalAction, default=True,
+                        help='choose whether to upload output to Google Sheets')
+    parser.add_argument(f'--{PARAM_DISTANCE}', type=int, default=2, choices=range(1, ARG_DISTANCE),
+                        help='set how many far a driver can be to pick up at a neighboring location before choosing a last resort driver')
+    parser.add_argument(f'--{PARAM_VACANCY}', type=int, default=2, choices=range(1, ARG_VACANCY),
+                        help='set how many open spots a driver must have to pick up at a neighboring location before choosing a last resort driver')
+    parser.add_argument(f'--{PARAM_LOG}', default='info', choices=['debug', 'info', 'warning', 'error', 'critical'],
+                        help='set a level of verbosity for logging')
     
-    valid_day = friday != sunday
-    valid_clear_opt = not (rotate and edit)
-    api_reqs_fulfilled = os.path.exists(SERVICE_ACCT_FILE) or not (update or fetch) 
-    execute = execute and valid_day and valid_clear_opt and api_reqs_fulfilled
+    args = vars(parser.parse_args())
 
-    if execute:
-        main(fetch, update, rotate, edit, friday, debug)
-    elif not api_reqs_fulfilled:
-        print(f'${SERVICE_ACCT_FILE} not found.')
-        print('Make sure service_account.json is in the cfg directory.')
-        print("Contact Eric Pham if you don't have it.")
-    else:
-        show_usage()
+    main(args);

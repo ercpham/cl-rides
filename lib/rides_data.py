@@ -5,6 +5,8 @@ from cfg.config import *
 import gspread
 import json
 import lib.preprocessing as prep
+import logging
+import numpy as np
 import os
 import pandas as pd
 import pickle
@@ -17,11 +19,11 @@ def update_pickles():
     # connect Google Sheets
     gc = gspread.service_account(filename=SERVICE_ACCT_FILE)
 
-    with open(os.path.join(CFG_PATH, SHEET_ID_FILE)) as gid_json:
+    with open(os.path.join(CFG_PATH, SHEET_IDS_FILE)) as gid_json:
         gid_data = json.load(gid_json)
 
     for key in gid_data:
-        print(f'Fetching {key}')
+        logging.info(f'Downloading {key}')
         ws = gc.open_by_key(gid_data[key]).get_worksheet(0)
         records = ws.get_all_records()
         with open(os.path.join(DATA_PATH, key), 'wb') as pickle_file:
@@ -33,15 +35,14 @@ def print_pickles():
 
     There is no call to the Google Sheets API, so the printed data is from the last call to update_pickles.
     """
-    with open(os.path.join(CFG_PATH, SHEET_ID_FILE)) as gid_json:
+    with open(os.path.join(CFG_PATH, SHEET_IDS_FILE)) as gid_json:
         keys = json.load(gid_json).keys()
 
     for key in keys:
-        print(f'Printing {key}')
         with open(os.path.join(DATA_PATH, key), 'rb') as pickle_file:
             records = pickle.load(pickle_file)
             df = pd.DataFrame(records)
-            print(df)
+            logging.debug(f'print_pickles --- Printing {key}\n{df}')
 
 
 def get_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -55,8 +56,6 @@ def get_data() -> Tuple[pd.DataFrame, pd.DataFrame]:
 
 def get_cached_input() -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Return a tuple of pandas DataFrames, ordered as (drivers, riders)
-    
-    If the rides data has not been read previously, the results may be outdated or an error might occur.
     """
     with open(os.path.join(DATA_PATH, PERMANENT_SHEET_KEY), 'rb') as pickle_file:
         permanent_riders = pd.DataFrame(pickle.load(pickle_file))
@@ -71,10 +70,16 @@ def get_cached_input() -> Tuple[pd.DataFrame, pd.DataFrame]:
     prep.standardize_weekly_responses(weekly_riders)
     
     # Reorder and rename columns before merging
-    weekly_riders = weekly_riders[[WEEKLY_RIDER_TIMESTAMP_KEY, WEEKLY_RIDER_NAME_KEY, WEEKLY_RIDER_PHONE_KEY, WEEKLY_RIDER_LOCATION_KEY, WEEKLY_RIDER_FRIDAY_KEY, WEEKLY_RIDER_SUNDAY_KEY, WEEKLY_RIDER_NOTES_KEY]]
-    weekly_riders.rename(columns={WEEKLY_RIDER_TIMESTAMP_KEY: RIDER_TIMESTAMP_KEY, WEEKLY_RIDER_NAME_KEY: RIDER_NAME_KEY, WEEKLY_RIDER_PHONE_KEY: RIDER_PHONE_KEY, WEEKLY_RIDER_LOCATION_KEY: RIDER_LOCATION_KEY, WEEKLY_RIDER_FRIDAY_KEY: RIDER_FRIDAY_KEY, WEEKLY_RIDER_SUNDAY_KEY: RIDER_SUNDAY_KEY, WEEKLY_RIDER_NOTES_KEY: RIDER_NOTES_KEY}, inplace=True)
-    permanent_riders.rename(columns={PERMANENT_RIDER_TIMESTAMP_KEY: RIDER_TIMESTAMP_KEY, PERMANENT_RIDER_NAME_KEY: RIDER_NAME_KEY, PERMANENT_RIDER_PHONE_KEY: RIDER_PHONE_KEY, PERMANENT_RIDER_LOCATION_KEY: RIDER_LOCATION_KEY, PERMANENT_RIDER_FRIDAY_KEY: RIDER_FRIDAY_KEY, PERMANENT_RIDER_SUNDAY_KEY: RIDER_SUNDAY_KEY, PERMANENT_RIDER_NOTES_KEY: RIDER_NOTES_KEY}, inplace=True)
-    riders = pd.concat([permanent_riders, weekly_riders])
+    if len(weekly_riders.index) > 0:
+        weekly_riders = weekly_riders[[WEEKLY_RIDER_TIMESTAMP_HDR, WEEKLY_RIDER_NAME_HDR, WEEKLY_RIDER_PHONE_HDR, WEEKLY_RIDER_LOCATION_HDR, WEEKLY_RIDER_FRIDAY_HDR, WEEKLY_RIDER_SUNDAY_HDR, WEEKLY_RIDER_NOTES_HDR]]
+        weekly_riders.rename(columns={WEEKLY_RIDER_TIMESTAMP_HDR: RIDER_TIMESTAMP_HDR, WEEKLY_RIDER_NAME_HDR: RIDER_NAME_HDR, WEEKLY_RIDER_PHONE_HDR: RIDER_PHONE_HDR, WEEKLY_RIDER_LOCATION_HDR: RIDER_LOCATION_HDR, WEEKLY_RIDER_FRIDAY_HDR: RIDER_FRIDAY_HDR, WEEKLY_RIDER_SUNDAY_HDR: RIDER_SUNDAY_HDR, WEEKLY_RIDER_NOTES_HDR: RIDER_NOTES_HDR}, inplace=True)
+        weekly_riders = weekly_riders[weekly_riders[RIDER_PHONE_HDR] != np.nan] # remove lines that have been deleted
+    if len(permanent_riders.index) > 0:
+        permanent_riders.rename(columns={PERMANENT_RIDER_TIMESTAMP_HDR: RIDER_TIMESTAMP_HDR, PERMANENT_RIDER_NAME_HDR: RIDER_NAME_HDR, PERMANENT_RIDER_PHONE_HDR: RIDER_PHONE_HDR, PERMANENT_RIDER_LOCATION_HDR: RIDER_LOCATION_HDR, PERMANENT_RIDER_FRIDAY_HDR: RIDER_FRIDAY_HDR, PERMANENT_RIDER_SUNDAY_HDR: RIDER_SUNDAY_HDR, PERMANENT_RIDER_NOTES_HDR: RIDER_NOTES_HDR}, inplace=True)
+    if ARGS[PARAM_JUST_WEEKLY]:
+        riders = weekly_riders
+    else:
+        riders = pd.concat([permanent_riders, weekly_riders])
     riders.reset_index(inplace=True, drop=True)
 
     return (drivers, riders)
@@ -83,12 +88,12 @@ def get_cached_input() -> Tuple[pd.DataFrame, pd.DataFrame]:
 def write_assignments(assignments: pd.DataFrame, update: bool):
     """Write the given dataframe to the output file. If update is True, write to final Google Sheet.
     """
-    print('Writing assignments')
+    logging.info('Writing assignments')
     # write to pickle
     assignments.to_pickle(os.path.join(DATA_PATH, OUTPUT_SHEET_KEY))
 
     if update:
-        with open(SHEET_ID_FILE) as gid_json:
+        with open(SHEET_IDS_FILE) as gid_json:
             gid_data = json.load(gid_json)
 
         # connect Google Sheets
@@ -96,6 +101,7 @@ def write_assignments(assignments: pd.DataFrame, update: bool):
         ws = gc.open_by_key(gid_data[OUTPUT_SHEET_KEY]).get_worksheet(0)
 
         ws.resize(rows=len(assignments))
+        logging.info('Uploading assignments')
         ws.update([assignments.columns.values.tolist()] + assignments.values.tolist())
 
 

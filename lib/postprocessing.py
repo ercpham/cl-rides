@@ -2,40 +2,92 @@
 """
 
 from cfg.config import *
+import logging
 import numpy as np
 import pandas as pd
 
 
-def clean_output(out: pd.DataFrame):
+def clean_output(out: pd.DataFrame) -> pd.DataFrame:
     """Filters out the unneeded columns and and validates the data before writing.
     """
-    _format_output(out)
+    return _format_output(out)
 
 
-def _format_output(out: pd.DataFrame):
-    """Organizes the output to order by driver then driver. Removes redundant driver details.
+def _format_output(out: pd.DataFrame) -> pd.DataFrame:
+    """Organizes the output to order by driver. Removes redundant driver details. Also spaces out driver groups.
     """
-    out.sort_values(by=[OUTPUT_DRIVER_NAME_KEY, RIDER_LOCATION_KEY], inplace=True)
+    if len(out) == 0:
+        return
+    
+    out.sort_values(by=[OUTPUT_DRIVER_NAME_HDR, RIDER_LOCATION_HDR], inplace=True)
     out.reset_index(inplace=True, drop=True)
 
-    for idx in range(len(out) - 1, 0, -1):
-        if out.at[idx, OUTPUT_DRIVER_NAME_KEY] is np.nan:
-            # Denote unassigned riders.
-            out.at[idx, OUTPUT_DRIVER_NAME_KEY] = '?'
-            out.at[idx, OUTPUT_DRIVER_PHONE_KEY] = '?'
-            out.at[idx, OUTPUT_DRIVER_CAPACITY_KEY] = ''
-        elif out.at[idx, OUTPUT_DRIVER_NAME_KEY] == out.at[idx - 1, OUTPUT_DRIVER_NAME_KEY]:
+    driver_cnt = 1
+    unassigned_cnt = 0
+    total_capacity = int(out.at[0, OUTPUT_DRIVER_CAPACITY_HDR])
+    for idx in range(1, len(out)):
+        if out.at[idx, OUTPUT_DRIVER_NAME_HDR] is not np.nan and out.at[idx, OUTPUT_DRIVER_NAME_HDR] != out.at[idx - 1, OUTPUT_DRIVER_NAME_HDR]:
+            total_capacity += int(out.at[idx, OUTPUT_DRIVER_CAPACITY_HDR])
+            driver_cnt += 1
+        
+        if out.at[idx, OUTPUT_DRIVER_NAME_HDR] is np.nan:
+            unassigned_cnt += 1
+
+    if unassigned_cnt > 0:
+        driver_cnt += 1
+ 
+    # Append enough rows to space out drivers
+    total_rows = total_capacity + driver_cnt + unassigned_cnt
+    new_out = pd.DataFrame({OUTPUT_DRIVER_NAME_HDR: [''] * total_rows,
+                            OUTPUT_DRIVER_PHONE_HDR: [''] * total_rows,
+                            OUTPUT_DRIVER_CAPACITY_HDR: [''] * total_rows,
+                            RIDER_NAME_HDR: [''] * total_rows,
+                            RIDER_PHONE_HDR: [''] * total_rows,
+                            RIDER_LOCATION_HDR: [''] * total_rows,
+                            RIDER_NOTES_HDR: [''] * total_rows
+                            })
+
+    # Edge case for 1st rider
+    _copy_output_row(new_out, out, 1, 0)
+    prev_driver_name = out.at[0, OUTPUT_DRIVER_NAME_HDR]
+    curr_driver_capacity = int(out.at[0, OUTPUT_DRIVER_CAPACITY_HDR]) if out.at[0, OUTPUT_DRIVER_CAPACITY_HDR] is not np.nan else 0
+    new_idx = 2
+    new_driver_idx = 1
+
+    for old_idx in range(1, len(out)):
+
+        # Handle formatting for a new driver
+        curr_driver_name = out.at[old_idx, OUTPUT_DRIVER_NAME_HDR] 
+        is_next_driver = prev_driver_name is not np.nan and prev_driver_name != curr_driver_name
+        if is_next_driver:
+            prev_driver_name = curr_driver_name
+            new_driver_idx += curr_driver_capacity + 1
+            curr_driver_capacity = int(out.at[old_idx, OUTPUT_DRIVER_CAPACITY_HDR]) if out.at[old_idx, OUTPUT_DRIVER_CAPACITY_HDR] is not np.nan else 0
+            new_idx = new_driver_idx
+
+        if curr_driver_name is np.nan:
+            # No driver assigned
+            out.at[old_idx, OUTPUT_DRIVER_NAME_HDR] = '?'
+            out.at[old_idx, OUTPUT_DRIVER_PHONE_HDR] = '?'
+            out.at[old_idx, OUTPUT_DRIVER_CAPACITY_HDR] = ''
+            logging.debug(f'_format_output --- {out.at[old_idx, RIDER_NAME_HDR]} has no driver')
+        elif not is_next_driver:
             # Remove redundant driver details.
-            out.at[idx, OUTPUT_DRIVER_NAME_KEY] = ''
-            out.at[idx, OUTPUT_DRIVER_PHONE_KEY] = ''
-            out.at[idx, OUTPUT_DRIVER_CAPACITY_KEY] = ''
+            out.at[old_idx, OUTPUT_DRIVER_NAME_HDR] = ''
+            out.at[old_idx, OUTPUT_DRIVER_PHONE_HDR] = ''
+            out.at[old_idx, OUTPUT_DRIVER_CAPACITY_HDR] = ''
 
+        _copy_output_row(new_out, out, new_idx, old_idx)
+        new_idx += 1
+    
+    return new_out
 
-def alert_skipped_riders(out: pd.DataFrame, debug: bool):
-    """Prints out all the riders who do not have a driver."""
-    if debug:
-        print("Printing stranded riders.")
-        for _, rider in out.iterrows():
-            if rider[OUTPUT_DRIVER_NAME_KEY] is np.NaN:
-                print(f'\t{rider[RIDER_NAME_KEY]} has no driver')
-        print()
+        
+def _copy_output_row(dst: pd.DataFrame, src: pd.DataFrame, dst_idx: int, src_idx: int):
+    dst.at[dst_idx, OUTPUT_DRIVER_NAME_HDR] = src.at[src_idx, OUTPUT_DRIVER_NAME_HDR]
+    dst.at[dst_idx, OUTPUT_DRIVER_PHONE_HDR] = src.at[src_idx, OUTPUT_DRIVER_PHONE_HDR]
+    dst.at[dst_idx, OUTPUT_DRIVER_CAPACITY_HDR] = src.at[src_idx, OUTPUT_DRIVER_CAPACITY_HDR]
+    dst.at[dst_idx, RIDER_NAME_HDR] = src.at[src_idx, RIDER_NAME_HDR]
+    dst.at[dst_idx, RIDER_PHONE_HDR] = src.at[src_idx, RIDER_PHONE_HDR]
+    dst.at[dst_idx, RIDER_LOCATION_HDR] = src.at[src_idx, RIDER_LOCATION_HDR]
+    dst.at[dst_idx, RIDER_NOTES_HDR] = src.at[src_idx, RIDER_NOTES_HDR]
